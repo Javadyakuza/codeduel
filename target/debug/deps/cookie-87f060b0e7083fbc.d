@@ -1,0 +1,12 @@
+/home/javad/Desktop/codeduel_backend/target/debug/deps/libcookie-87f060b0e7083fbc.rmeta: /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/lib.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/builder.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/parse.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/jar.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/delta.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/same_site.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/expiration.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/prefix.rs
+
+/home/javad/Desktop/codeduel_backend/target/debug/deps/cookie-87f060b0e7083fbc.d: /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/lib.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/builder.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/parse.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/jar.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/delta.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/same_site.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/expiration.rs /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/prefix.rs
+
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/lib.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/builder.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/parse.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/jar.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/delta.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/same_site.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/expiration.rs:
+/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cookie-0.18.0/src/prefix.rs:
