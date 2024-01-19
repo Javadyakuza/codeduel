@@ -6,8 +6,9 @@ use diesel::dsl::sql;
 use diesel::pg::Pg;
 use serde::{Deserialize, Serialize};
 
-// general models
-#[derive(Queryable, Selectable, Debug, Insertable)]
+// ------------------------------- general models ----------------------------
+// the following models will represent the actual schema of the tables in terms of the rust structs.
+#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::wallets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Wallets {
@@ -15,7 +16,7 @@ pub struct Wallets {
     pub sol_addr: String,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Responses {
@@ -27,7 +28,7 @@ pub struct Responses {
     pub creation_time: NaiveDateTime,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Questions {
@@ -42,7 +43,7 @@ pub struct Questions {
     pub category: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct TestCases {
@@ -52,7 +53,7 @@ pub struct TestCases {
     pub test_outputs: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Users {
@@ -64,10 +65,10 @@ pub struct Users {
     pub total_claimed: i32,
 }
 
-// inserting models
+// ------------------------------- insertable models ----------------------------
 // the following models are not containing the primary key fields, making able the fns to insert the values without the pks.
 
-#[derive(Queryable, Selectable, Debug, Insertable)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IResponses {
@@ -79,7 +80,7 @@ pub struct IResponses {
     pub creation_time: NaiveDateTime,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IQuestions {
@@ -94,7 +95,7 @@ pub struct IQuestions {
     pub category: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct ITestCases {
@@ -104,7 +105,7 @@ pub struct ITestCases {
     pub test_outputs: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IUsers {
@@ -114,4 +115,15 @@ pub struct IUsers {
     pub password: String,
     pub total_payed: i32,
     pub total_claimed: i32,
+}
+
+// ------------------------------- queryable models ----------------------------
+// the following models will provide the dynamic inputs for the getter functions
+
+pub struct QResponses {
+    pub response_id: Option<i32>,
+    pub question_id: Option<i32>,
+    pub daredevil_id: Option<i32>,
+    // mod 1 = Some, None, None => search by the response id.
+    // mod 2 = None, Some, Some => search by the daredevil and related question id.
 }
