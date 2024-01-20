@@ -18,7 +18,8 @@ diesel = { version = "2.1.1", features = ["postgres", "chrono"] }
 dotenvy = "0.15.7"
 rocket = "0.4.5"
 serde = { version = "1.0.195", features = ["derive"] }
-
+solana-client = "1.10.32"
+solana-sdk = "1.10.32"
 
 [dependencies.rocket_contrib]
 version = "0.4.5"
