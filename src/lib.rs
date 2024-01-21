@@ -31,7 +31,7 @@ pub fn establish_connection() -> PgConnection {
 }
 
 // general ** setters
-// unchecked - un-optimized
+// unchecked - un-optimized - unchecked word casing (all must be saved in the lowercase)
 pub fn add_new_user(
     conn: &mut PgConnection,
     _new_user: &IUsers,
@@ -186,6 +186,116 @@ pub fn get_response(
         && (!_query_struct.response_id.is_some() | !_query_struct.daredevil_id.is_some()))
         | (_query_struct.question_id.is_some()
             && (!_query_struct.response_id.is_none() | !_query_struct.daredevil_id.is_none()))
+    {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "the response query format is wrong ! \n
+            supported formats: \n
+            1 - Some(question_id), None(response_id), None(daredevil_id) \n
+            2 - None(question_id), Some(response_id), Some(daredevil_id)",
+        )));
+    } else {
+        //    fetching the user id if the user name was provided
+        if _query_struct.question_id.is_none() {
+            // searching by the daredevil id
+            let tmp_responses: Vec<Responses> = responses
+                .filter(responses::question_id.eq(_query_struct.question_id.unwrap())) // panic impossible
+                .filter(responses::daredevil_id.eq(_query_struct.daredevil_id.unwrap())) // panic impossible
+                .select(Responses::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_responses.len() == 0 {
+                // response doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "response not found !",
+                )))
+            } else {
+                Ok(tmp_responses[0].to_owned())
+            }
+        } else {
+            let tmp_responses: Vec<Responses> = responses
+                .filter(responses::response_id.eq(_query_struct.response_id.unwrap())) // panic impossible
+                .select(Responses::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_responses.len() == 0 {
+                // response doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "response not found !",
+                )))
+            } else {
+                Ok(tmp_responses[0].to_owned())
+            }
+        }
+    }
+}
+
+pub fn get_question(
+    _conn: &mut PgConnection,
+    _query_struct: &QResponses,
+) -> Result<Responses, Box<dyn std::error::Error>> {
+    // checking the format of the struct
+    if (_query_struct.question_id.is_none()
+        && (!_query_struct.response_id.is_some() | !_query_struct.daredevil_id.is_some()))
+        | (_query_struct.question_id.is_some()
+            && (!_query_struct.response_id.is_none() | !_query_struct.daredevil_id.is_none()))
+    {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "the response query format is wrong ! \n
+            supported formats: \n
+            1 - Some(question_id), None(response_id), None(daredevil_id) \n
+            2 - None(question_id), Some(response_id), Some(daredevil_id)",
+        )));
+    } else {
+        //    fetching the user id if the user name was provided
+        if _query_struct.question_id.is_none() {
+            // searching by the daredevil id
+            let tmp_responses: Vec<Responses> = responses
+                .filter(responses::question_id.eq(_query_struct.question_id.unwrap())) // panic impossible
+                .filter(responses::daredevil_id.eq(_query_struct.daredevil_id.unwrap())) // panic impossible
+                .select(Responses::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_responses.len() == 0 {
+                // response doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "response not found !",
+                )))
+            } else {
+                Ok(tmp_responses[0].to_owned())
+            }
+        } else {
+            let tmp_responses: Vec<Responses> = responses
+                .filter(responses::response_id.eq(_query_struct.response_id.unwrap())) // panic impossible
+                .select(Responses::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_responses.len() == 0 {
+                // response doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "response not found !",
+                )))
+            } else {
+                Ok(tmp_responses[0].to_owned())
+            }
+        }
+    }
+}
+
+pub fn get_questions(
+    _conn: &mut PgConnection,
+    _query_struct: &QResponses,
+) -> Result<Vec<Questions>, Box<dyn std::error::Error>> {
+    // checking the format of the struct
+    if (_query_struct.question_id.is_none()
+        && (!_query_struct.response_id.is_some() | !_query_struct.daredevil_id.is_some()))
+        | (_query_struct.question_id.is_some()
+            && (!_query_struct.response_id.is_none() | !_query_struct.daredevil_id.is_none())) |‌
     {
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,

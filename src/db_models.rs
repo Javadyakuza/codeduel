@@ -127,3 +127,23 @@ pub struct QResponses {
     // mod 1 = Some, None, None => search by the response id.
     // mod 2 = None, Some, Some => search by the daredevil and related question id.
 }
+
+impl QResponses {
+    pub fn get_correct_structures(QResponses) -> bool {
+
+    }
+}
+pub enum Categories {
+    All,
+    SolanaPrograms,
+    Rust,
+}
+pub struct QQuestions {
+    pub question_id: Option<i32>,
+    pub question_title: Option<i32>,
+    pub rival_id: Option<i32>,
+    pub question_category: Option<Categories>,
+    // mod 1 = Some, None, None, None => search by the response id.
+    // mod 2 = None, Some, Some, None => search by the rival and related question title.
+    // mod 3 = None, None, None, Some => get all questions or a certain category of the questions.
+}
