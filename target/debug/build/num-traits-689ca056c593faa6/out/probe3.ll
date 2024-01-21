@@ -1,11 +1,11 @@
-; ModuleID = 'probe3.560c0f5e03724aac-cgu.0'
-source_filename = "probe3.560c0f5e03724aac-cgu.0"
+; ModuleID = 'probe3.2e0a01328e0c2445-cgu.0'
+source_filename = "probe3.2e0a01328e0c2445-cgu.0"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 ; probe3::probe
 ; Function Attrs: nonlazybind uwtable
-define void @_ZN6probe35probe17he1af27de1dac7332E() unnamed_addr #0 {
+define void @_ZN6probe35probe17he2232e9499deb0e3E() unnamed_addr #0 {
 start:
   %0 = alloca i32, align 4
   store i32 1, ptr %0, align 4
@@ -24,5 +24,5 @@ attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memo
 
 !0 = !{i32 8, !"PIC Level", i32 2}
 !1 = !{i32 2, !"RtLibUseGOT", i32 1}
-!2 = !{!"rustc version 1.77.0-nightly (d6d7a9386 2023-12-22)"}
+!2 = !{!"rustc version 1.77.0-nightly (88189a71e 2024-01-19)"}
 !3 = !{}

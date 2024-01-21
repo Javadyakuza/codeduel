@@ -1,5 +1,5 @@
-/home/javad/Desktop/codeduel_backend/target/debug/build/unicase-6c0d077bf9aa2144/build_script_build-6c0d077bf9aa2144: /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs
+/home/javadyakuza/rust_projects/codeduel_backend/target/debug/build/unicase-6c0d077bf9aa2144/build_script_build-6c0d077bf9aa2144: /home/javadyakuza/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs
 
-/home/javad/Desktop/codeduel_backend/target/debug/build/unicase-6c0d077bf9aa2144/build_script_build-6c0d077bf9aa2144.d: /home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs
+/home/javadyakuza/rust_projects/codeduel_backend/target/debug/build/unicase-6c0d077bf9aa2144/build_script_build-6c0d077bf9aa2144.d: /home/javadyakuza/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs
 
-/home/javad/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs:
+/home/javadyakuza/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicase-1.4.2/build.rs:

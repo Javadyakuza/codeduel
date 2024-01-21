@@ -1,11 +1,11 @@
-; ModuleID = 'probe7.f2d5e1825bddfe0f-cgu.0'
-source_filename = "probe7.f2d5e1825bddfe0f-cgu.0"
+; ModuleID = 'probe7.1a8dd014e06dfb38-cgu.0'
+source_filename = "probe7.1a8dd014e06dfb38-cgu.0"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 ; core::f64::<impl f64>::to_ne_bytes
 ; Function Attrs: inlinehint nonlazybind uwtable
-define internal i64 @"_ZN4core3f6421_$LT$impl$u20$f64$GT$11to_ne_bytes17h7916a41893963971E"(double %self) unnamed_addr #0 {
+define internal i64 @"_ZN4core3f6421_$LT$impl$u20$f64$GT$11to_ne_bytes17h0c3d5993d4bd46d4E"(double %self) unnamed_addr #0 {
 start:
   %_0 = alloca [8 x i8], align 1
   %self1 = bitcast double %self to i64
@@ -16,12 +16,12 @@ start:
 
 ; probe7::probe
 ; Function Attrs: nonlazybind uwtable
-define void @_ZN6probe75probe17ha470f4848517b1bdE() unnamed_addr #1 {
+define void @_ZN6probe75probe17hb121c7c5c8a85680E() unnamed_addr #1 {
 start:
   %0 = alloca i64, align 8
   %_1 = alloca [8 x i8], align 1
 ; call core::f64::<impl f64>::to_ne_bytes
-  %1 = call i64 @"_ZN4core3f6421_$LT$impl$u20$f64$GT$11to_ne_bytes17h7916a41893963971E"(double 3.140000e+00)
+  %1 = call i64 @"_ZN4core3f6421_$LT$impl$u20$f64$GT$11to_ne_bytes17h0c3d5993d4bd46d4E"(double 3.140000e+00)
   store i64 %1, ptr %0, align 8
   call void @llvm.memcpy.p0.p0.i64(ptr align 1 %_1, ptr align 8 %0, i64 8, i1 false)
   ret void
@@ -39,4 +39,4 @@ attributes #2 = { nocallback nofree nounwind willreturn memory(argmem: readwrite
 
 !0 = !{i32 8, !"PIC Level", i32 2}
 !1 = !{i32 2, !"RtLibUseGOT", i32 1}
-!2 = !{!"rustc version 1.77.0-nightly (d6d7a9386 2023-12-22)"}
+!2 = !{!"rustc version 1.77.0-nightly (88189a71e 2024-01-19)"}
