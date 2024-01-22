@@ -129,21 +129,67 @@ pub struct QResponses {
 }
 
 impl QResponses {
-    pub fn get_correct_structures(QResponses) -> bool {
-
+    pub fn is_correct_structures(instance: &QResponses) -> bool {
+        if (instance.question_id.is_some()
+            && !instance.response_id.is_none()
+            && !instance.daredevil_id.is_none())
+            | (instance.question_id.is_none()
+                && !instance.response_id.is_some()
+                && !instance.daredevil_id.is_some())
+        {
+            true
+        } else {
+            false
+        }
     }
 }
+#[derive(Clone)]
 pub enum Categories {
     All,
     SolanaPrograms,
     Rust,
 }
-pub struct QQuestions {
+impl Categories {
+    pub fn to_string(category: Option<&Self>) -> String {
+        match category {
+            Some(cat) => match cat {
+                Self::All => "All".to_string(),
+                Self::Rust => "Rust".to_string(),
+                Self::SolanaPrograms => "SolanaPrograms".to_string(),
+            },
+            _ => "All".to_string(),
+        }
+    }
+}
+pub struct QQuestions<'a> {
     pub question_id: Option<i32>,
-    pub question_title: Option<i32>,
+    pub question_title: Option<&'a str>,
     pub rival_id: Option<i32>,
     pub question_category: Option<Categories>,
-    // mod 1 = Some, None, None, None => search by the response id.
+    // mod 1 = Some, None, None, None => search by the question id.
     // mod 2 = None, Some, Some, None => search by the rival and related question title.
     // mod 3 = None, None, None, Some => get all questions or a certain category of the questions.
+}
+
+// unoptimized
+impl QQuestions<'_> {
+    pub fn is_correct_structures(instance: &QQuestions) -> bool {
+        if (instance.question_id.is_some()
+            && !instance.question_title.is_none()
+            && !instance.rival_id.is_none()
+            && !instance.question_category.is_none())
+            | (instance.question_id.is_none()
+                && !instance.question_title.is_some()
+                && !instance.rival_id.is_some()
+                && !instance.question_category.is_none())
+            | (instance.question_id.is_none()
+                && !instance.question_title.is_none()
+                && !instance.rival_id.is_none()
+                && !instance.question_category.is_some())
+        {
+            true
+        } else {
+            false
+        }
+    }
 }
