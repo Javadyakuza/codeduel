@@ -6,8 +6,8 @@ use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
-use chrono::Local;
-use db_models::{Categories, QQuestions, QResponses, UUser};
+use chrono::{Local, NaiveDate, NaiveDateTime};
+use db_models::{Categories, QQuestions, QResponses, UQuestion, UUser};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -51,6 +51,7 @@ pub fn add_new_user(
         }
     }
 }
+
 // unchecked - un-optimized
 pub fn add_user_wallet(
     conn: &mut PgConnection,
@@ -71,6 +72,7 @@ pub fn add_user_wallet(
         }
     }
 }
+
 // unchecked - un-optimized
 pub fn add_new_question(
     conn: &mut PgConnection,
@@ -107,6 +109,7 @@ pub fn add_new_question(
     }
     // todo!("formatting the question title");
 }
+
 // unchecked - un-optimized
 pub fn add_response(
     conn: &mut PgConnection,
@@ -291,6 +294,25 @@ pub fn get_question(
     }
 }
 
+pub fn get_test_cases(
+    _conn: &mut PgConnection,
+    _question_id: i32,
+) -> Result<TestCases, Box<dyn std::error::Error>> {
+    let tmp_questions_tcs: Vec<TestCases> = test_cases
+        .filter(test_cases::question_id.eq(_question_id)) // panic impossible
+        .select(TestCases::as_select())
+        .load(_conn)
+        .unwrap_or(vec![]);
+    if tmp_questions_tcs.len() == 0 {
+        // question doesn't exists
+        Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "question not found !",
+        )))
+    } else {
+        Ok(tmp_questions_tcs[0].to_owned())
+    }
+}
 // // general ** updaters
 pub fn update_user(
     _conn: &mut PgConnection,
@@ -298,31 +320,15 @@ pub fn update_user(
 ) -> Result<Users, Box<dyn std::error::Error>> {
     // checking the editor authority for editing the user info
     let user_old_info: Users;
-    match get_user(_conn, new_user_info.editor) {
-        Ok(eu) => match get_user(_conn, new_user_info.old_username_or_id) {
-            Ok(ou) => {
-                if eu.user_id == ou.user_id {
-                    user_old_info = ou;
-                } else {
-                    return Err(Box::new(std::io::Error::new(
-                        std::io::ErrorKind::PermissionDenied,
-                        format!(
-                            "user id {} doesn't have the authority to edit the user id {} info",
-                            eu.user_id, ou.user_id
-                        ),
-                    )));
-                }
-            }
-            Err(e) => {
-                return Err(Box::new(std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    format!("{:?}", e),
-                )))
-            }
-        },
+    match check_authority(
+        _conn,
+        new_user_info.editor,
+        new_user_info.old_username_or_id,
+    ) {
+        Ok(ui) => user_old_info = ui,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
+                std::io::ErrorKind::Other,
                 format!("{:?}", e),
             )))
         }
@@ -339,6 +345,114 @@ pub fn update_user(
         .get_result(_conn)
     {
         Ok(nu) => Ok(nu),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+}
+
+pub fn update_question(
+    _conn: &mut PgConnection,
+    new_question_info: &UQuestion,
+) -> Result<Questions, Box<dyn std::error::Error>> {
+    // checking the editor authority for editing the question
+    let user_old_info: Users;
+    match check_authority(_conn, new_question_info.editor, new_question_info.rival_id) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+
+    // preapring the deadline
+    let _deadline: NaiveDateTime;
+    match NaiveDateTime::parse_from_str(&new_question_info.deadline, "%Y-%m-%d %H:%M:%S") {
+        Ok(ndt) => _deadline = ndt,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("couldnt parse the date time {:?}", e),
+            )))
+        }
+    }
+    let _question_id: i32;
+
+    match get_question(
+        _conn,
+        &QQuestions {
+            question_id: None,
+            question_title: Some(new_question_info.question_title),
+            rival_id: Some(user_old_info.user_id),
+            question_category: None,
+        },
+    ) {
+        Ok(qi) => _question_id = qi.question_id,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!(" {:?}", e),
+            )))
+        }
+    }
+    // preparing the testcases
+    let mut old_tcs: TestCases = Default::default();
+    match get_test_cases(_conn, _question_id) {
+        Ok(tc) => {
+            if new_question_info.test_inputs == "" {
+                old_tcs.test_inputs = tc.test_inputs
+            } else {
+                old_tcs.test_inputs = new_question_info.test_inputs.to_string()
+            }
+            if new_question_info.test_outputs == "" {
+                old_tcs.test_outputs = tc.test_outputs
+            } else {
+                old_tcs.test_outputs = new_question_info.test_outputs.to_string()
+            }
+        }
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!(" {:?}", e),
+            )))
+        }
+    }
+    // updating the questions table
+    match diesel::update(questions.filter(questions::question_id.eq(_question_id)))
+        .set((
+            question_title.eq(&new_question_info.question_title),
+            question_body.eq(&new_question_info.question_body),
+            deadline.eq(&_deadline),
+            question_status.eq(&new_question_info.question_status),
+            daredevil.eq(&new_question_info.daredevil),
+            category.eq(&new_question_info.category),
+        ))
+        .returning(Questions::as_returning())
+        .get_result(_conn)
+    {
+        Ok(nq) => {
+            match diesel::update(test_cases.filter(test_cases::question_id.eq(nq.question_id)))
+                .set((
+                    test_inputs.eq(&old_tcs.test_inputs),
+                    test_outputs.eq(&old_tcs.test_outputs),
+                ))
+                .returning(TestCases::as_returning())
+                .get_result(_conn)
+            {
+                Ok(_) => Ok(nq),
+                Err(e) => {
+                    return Err(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        format!("{:?}", e),
+                    )))
+                }
+            }
+        }
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
@@ -507,27 +621,38 @@ pub fn update_user(
 // }
 
 // // custom ** getter
-// pub fn get_chat_room_participants_by_id(
-//     _conn: &mut PgConnection,
-//     _chat_room_id: i32,
-// ) -> Result<Vec<ChatRoomParticipants>, Box<dyn std::error::Error>> {
-//     // getting the participants
-//     let participants: Vec<ChatRoomParticipants> = chat_room_participants
-//         .filter(chat_room_participants::chat_room_id.eq(_chat_room_id))
-//         .select(ChatRoomParticipants::as_select())
-//         .load(_conn)
-//         .unwrap_or(vec![]);
-
-//     if participants.len() == 0 {
-//         // chat room id doesn't exists
-//         Err(Box::new(std::io::Error::new(
-//             std::io::ErrorKind::NotFound,
-//             "chat room id not found or it has no members!",
-//         )))
-//     } else {
-//         Ok(participants)
-//     }
-// }
+pub fn check_authority(
+    _conn: &mut PgConnection,
+    _1: &str,
+    _2: &str,
+) -> Result<Users, Box<dyn std::error::Error>> {
+    match get_user(_conn, _1) {
+        Ok(eu) => match get_user(_conn, _1) {
+            Ok(ou) => {
+                if eu.user_id == ou.user_id {
+                    Ok(ou)
+                } else {
+                    return Err(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::PermissionDenied,
+                        format!("edit premission denied for user id {}", _1),
+                    )));
+                }
+            }
+            Err(e) => {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("{:?}", e),
+                )))
+            }
+        },
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("{:?}", e),
+            )))
+        }
+    }
+}
 
 // // custom ** updaters
 // pub fn update_group_chat_room_info(

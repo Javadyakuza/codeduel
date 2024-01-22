@@ -43,14 +43,14 @@ pub struct Questions {
     pub category: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Default)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct TestCases {
     pub test_case_id: i32,
     pub question_id: i32,
-    pub test_inputs: String,
-    pub test_outputs: String,
+    pub test_inputs: String,  // stringified json
+    pub test_outputs: String, // stringified json
 }
 
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
@@ -88,7 +88,8 @@ pub struct IQuestions {
     pub rival_id: i32,
     pub question_title: String,
     pub question_body: String,
-    pub creation_time: NaiveDateTime,
+    // @dev because the deadlines and the creation times are setted in the same timezone they are compareable and no conflict is expected
+    // pub creation_time: NaiveDateTime, // will be the deafult value defined in the table
     pub deadline: NaiveDateTime,
     pub question_status: i32,
     pub daredevil: Option<i32>,
@@ -202,4 +203,18 @@ pub struct UUser<'a> {
     pub new_password: &'a str,
     pub new_username: &'a str,
     pub editor: &'a str,
+}
+
+pub struct UQuestion<'a> {
+    pub editor: &'a str,
+    pub rival_id: &'a str,
+    pub old_question_title: &'a str,
+    pub question_title: &'a str,
+    pub question_body: &'a str,
+    pub deadline: &'a str,
+    pub question_status: i32,
+    pub daredevil: Option<i32>,
+    pub category: &'a str,
+    pub test_inputs: &'a str,  // if empty will not be updated
+    pub test_outputs: &'a str, // if empty will not be updated
 }
