@@ -171,7 +171,7 @@ pub struct QQuestions<'a> {
     // mod 3 = None, None, None, Some => get all questions or a certain category of the questions.
 }
 
-// unoptimized
+// unoptimized -> must be done using the match
 impl QQuestions<'_> {
     pub fn is_correct_structures(instance: &QQuestions) -> bool {
         if (instance.question_id.is_some()
@@ -192,4 +192,14 @@ impl QQuestions<'_> {
             false
         }
     }
+}
+
+// ------------------------------- updatedable models --------------------------
+// the following models will provide the dynamic inputs for the getter functions
+pub struct UUser<'a> {
+    pub old_username_or_id: &'a str,
+    pub new_email: &'a str,
+    pub new_password: &'a str,
+    pub new_username: &'a str,
+    pub editor: &'a str,
 }

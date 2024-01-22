@@ -7,7 +7,7 @@ use crate::db_models::{
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::Local;
-use db_models::{Categories, QQuestions, QResponses};
+use db_models::{Categories, QQuestions, QResponses, UUser};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -132,48 +132,40 @@ pub fn add_response(
 pub fn get_user(
     _conn: &mut PgConnection,
     _username_or_id: &str,
-    _is_id: bool,
 ) -> Result<Users, Box<dyn std::error::Error>> {
     // fetching the user id if the user name was provided
-    if !_is_id {
-        let tmp_users: Vec<Users> = users
-            .filter(users::username.eq(_username_or_id))
-            .select(Users::as_select())
-            .load(_conn)
-            .unwrap_or(vec![]);
-        if tmp_users.len() == 0 {
-            // chat room id doesn't exists
-            Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "username not found !",
-            )))
-        } else {
-            Ok(tmp_users[0].to_owned())
-        }
-    } else {
-        let _user_id: i32;
-        match _username_or_id.parse::<i32>() {
-            Ok(ui) => _user_id = ui,
-            Err(e) => {
+    match _username_or_id.parse::<i32>() {
+        Ok(ui) => {
+            let tmp_users: Vec<Users> = users
+                .filter(users::user_id.eq(ui))
+                .select(Users::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_users.len() == 0 {
+                // chat room id doesn't exists
                 return Err(Box::new(std::io::Error::new(
-                    std::io::ErrorKind::InvalidInput,
-                    "invalid user id string",
-                )))
+                    std::io::ErrorKind::NotFound,
+                    "user id not found !",
+                )));
+            } else {
+                return Ok(tmp_users[0].to_owned());
             }
         }
-        let tmp_users: Vec<Users> = users
-            .filter(users::username.eq(_username_or_id))
-            .select(Users::as_select())
-            .load(_conn)
-            .unwrap_or(vec![]);
-        if tmp_users.len() == 0 {
-            // chat room id doesn't exists
-            Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "username not found !",
-            )))
-        } else {
-            Ok(tmp_users[0].to_owned())
+        Err(e) => {
+            let tmp_users: Vec<Users> = users
+                .filter(users::username.eq(_username_or_id))
+                .select(Users::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_users.len() == 0 {
+                // chat room id doesn't exists
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "username not found !",
+                )));
+            } else {
+                return Ok(tmp_users[0].to_owned());
+            }
         }
     }
 }
@@ -300,72 +292,61 @@ pub fn get_question(
 }
 
 // // general ** updaters
-// pub fn update_group_chat_room_info(
-//     _conn: &mut PgConnection,
-//     old_chat_room_name: &String,
-//     new_chat_room_info: &UpdatableChatRooms,
-//     editor_username: &String,
-// ) -> Result<QChatRooms, Box<dyn std::error::Error>> {
-//     let _chat_room_id: i32;
-//     match get_group_chat_by_name(_conn, old_chat_room_name) {
-//         Ok(res) => _chat_room_id = res.chat_room_id,
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
+pub fn update_user(
+    _conn: &mut PgConnection,
+    new_user_info: &UUser,
+) -> Result<Users, Box<dyn std::error::Error>> {
+    // checking the editor authority for editing the user info
+    let user_old_info: Users;
+    match get_user(_conn, new_user_info.editor) {
+        Ok(eu) => match get_user(_conn, new_user_info.old_username_or_id) {
+            Ok(ou) => {
+                if eu.user_id == ou.user_id {
+                    user_old_info = ou;
+                } else {
+                    return Err(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::PermissionDenied,
+                        format!(
+                            "user id {} doesn't have the authority to edit the user id {} info",
+                            eu.user_id, ou.user_id
+                        ),
+                    )));
+                }
+            }
+            Err(e) => {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("{:?}", e),
+                )))
+            }
+        },
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("{:?}", e),
+            )))
+        }
+    }
 
-//     let editor_user_id: i32;
-//     match get_user_with_username(_conn, &editor_username) {
-//         Ok(res) => editor_user_id = res.user_id,
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
-
-//     match get_group_owner_by_id(_conn, _chat_room_id) {
-//         Ok(res) => {
-//             if editor_user_id != res {
-//                 return Err(Box::new(std::io::Error::new(
-//                     std::io::ErrorKind::PermissionDenied,
-//                     format!(
-//                         "user id {} is not allowed to edit the group info",
-//                         editor_user_id
-//                     ),
-//                 )));
-//             }
-//         }
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
-
-//     // updating the chat room info
-//     match diesel::update(chat_rooms.filter(chat_rooms::chat_room_id.eq(_chat_room_id)))
-//         .set((
-//             room_name.eq(&new_chat_room_info.room_name),
-//             room_description.eq(&new_chat_room_info.room_description),
-//         ))
-//         .returning(QChatRooms::as_returning())
-//         .get_result(_conn)
-//     {
-//         Ok(_) => Ok(get_group_chat_by_name(_conn, &new_chat_room_info.room_name).unwrap()),
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::Other,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
-// }
+    // updating the chat room info
+    match diesel::update(users.filter(users::user_id.eq(user_old_info.user_id)))
+        .set((
+            email.eq(&new_user_info.new_email),
+            password.eq(&new_user_info.new_password),
+            username.eq(&new_user_info.new_username),
+        ))
+        .returning(Users::as_returning())
+        .get_result(_conn)
+    {
+        Ok(nu) => Ok(nu),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+}
 
 // // general removers
 // pub fn delete_group_chat_room(
