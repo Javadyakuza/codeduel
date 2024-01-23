@@ -532,9 +532,10 @@ pub fn delete_user(
             )))
         }
     }
-
+    
     // the questions and the responses of the user wont be deleted
-    // the active questions will be set to the closed and will not be available to be answered any more
+    // the user can not remove the designed questions, the user must wait until the highest deadline amount.
+    
 
     Ok(true)
 }

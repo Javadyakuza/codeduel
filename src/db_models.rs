@@ -127,23 +127,31 @@ pub struct QResponses {
     pub daredevil_id: Option<i32>,
     // mod 1 = Some, None, None => search by the response id.
     // mod 2 = None, Some, Some => search by the daredevil and related question id.
+    // mod 3 = None, None, Some => get all of the responses of the daredevil.
 }
 
 impl QResponses {
     pub fn is_correct_structures(instance: &QResponses) -> bool {
-        if (instance.question_id.is_some()
-            && !instance.response_id.is_none()
-            && !instance.daredevil_id.is_none())
-            | (instance.question_id.is_none()
-                && !instance.response_id.is_some()
-                && !instance.daredevil_id.is_some())
-        {
-            true
-        } else {
-            false
+        match (
+            instance.question_id.is_some(),
+            !instance.response_id.is_some(),
+            !instance.daredevil_id.is_some(),
+        ) {
+            // Case 1: All fields are present
+            (true, false, false) => true,
+
+            // Case 2: Question ID and Daredevil ID are present
+            (false, true, true) => true,
+
+            // Case 3: Response ID and Daredevil ID are present
+            (false, false, true) => true,
+
+            // None of the fields are present
+            _ => false,
         }
     }
 }
+
 #[derive(Clone)]
 pub enum Categories {
     All,
@@ -169,28 +177,31 @@ pub struct QQuestions<'a> {
     pub question_category: Option<Categories>,
     // mod 1 = Some, None, None, None => search by the question id.
     // mod 2 = None, Some, Some, None => search by the rival and related question title.
-    // mod 3 = None, None, None, Some => get all questions or a certain category of the questions.
+    // mod 3 = None, None, Some, None => get all of the rival questions
+    // mod 4 = None, None, None, Some => get all questions or a certain category of the questions.
 }
-
-// un-optimized -> must be done using the match
 impl QQuestions<'_> {
     pub fn is_correct_structures(instance: &QQuestions) -> bool {
-        if (instance.question_id.is_some()
-            && !instance.question_title.is_none()
-            && !instance.rival_id.is_none()
-            && !instance.question_category.is_none())
-            | (instance.question_id.is_none()
-                && !instance.question_title.is_some()
-                && !instance.rival_id.is_some()
-                && !instance.question_category.is_none())
-            | (instance.question_id.is_none()
-                && !instance.question_title.is_none()
-                && !instance.rival_id.is_none()
-                && !instance.question_category.is_some())
-        {
-            true
-        } else {
-            false
+        match (
+            instance.question_id.is_some(),
+            !instance.question_title.is_some(),
+            !instance.rival_id.is_some(),
+            !instance.question_category.is_some(),
+        ) {
+            // Case 1: All fields are present
+            (true, false, false, false) => true,
+
+            // Case 2: Question ID, Rival ID, and Question Category are present
+            (false, true, true, false) => true,
+
+            // Case 3: Question Title, Rival ID, and Question Category are present
+            (false, false, true, false) => true,
+
+            // Case 4: Question Title and Rival ID are present
+            (false, false, false, true) => true,
+
+            // None of the fields are present
+            _ => false,
         }
     }
 }
