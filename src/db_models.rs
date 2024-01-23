@@ -88,8 +88,8 @@ pub struct IQuestions {
     pub rival_id: i32,
     pub question_title: String,
     pub question_body: String,
-    // @dev because the deadlines and the creation times are setted in the same timezone they are compareable and no conflict is expected
-    // pub creation_time: NaiveDateTime, // will be the deafult value defined in the table
+    // @dev because the deadlines and the creation times are set in the same timezone they are comparable and no conflict is expected
+    // pub creation_time: NaiveDateTime, // will be the default value defined in the table
     pub deadline: NaiveDateTime,
     pub question_status: i32,
     pub daredevil: Option<i32>,
@@ -172,7 +172,7 @@ pub struct QQuestions<'a> {
     // mod 3 = None, None, None, Some => get all questions or a certain category of the questions.
 }
 
-// unoptimized -> must be done using the match
+// un-optimized -> must be done using the match
 impl QQuestions<'_> {
     pub fn is_correct_structures(instance: &QQuestions) -> bool {
         if (instance.question_id.is_some()
@@ -195,7 +195,7 @@ impl QQuestions<'_> {
     }
 }
 
-// ------------------------------- updatedable models --------------------------
+// ------------------------------- updatable models ----------------------------
 // the following models will provide the dynamic inputs for the getter functions
 pub struct UUser<'a> {
     pub old_username_or_id: &'a str,
@@ -223,4 +223,11 @@ pub struct UWallets<'a> {
     pub editor: &'a str,
     pub username_or_id: &'a str,
     pub new_sol_addr: &'a str,
+}
+
+// ---------------------------------------------------------- removable models ---------------------------------------------------------
+// the following models will provide the simple editor user id and certain unique single input for removing the values from the database
+pub struct RUsers<'a> {
+    pub remover: &'a str,
+    pub username_or_id: &'a str,
 }

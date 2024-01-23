@@ -7,7 +7,7 @@ use crate::db_models::{
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::{Local, NaiveDate, NaiveDateTime};
-use db_models::{Categories, QQuestions, QResponses, UQuestion, UUser, UWallets};
+use db_models::{Categories, QQuestions, QResponses, RUsers, UQuestion, UUser, UWallets};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -317,14 +317,14 @@ pub fn get_test_cases(
 // // general ** updaters
 pub fn update_user(
     _conn: &mut PgConnection,
-    new_user_info: &UUser,
+    _new_user_info: &UUser,
 ) -> Result<Users, Box<dyn std::error::Error>> {
     // checking the editor authority for editing the user info
     let user_old_info: Users;
     match check_authority(
         _conn,
-        new_user_info.editor,
-        new_user_info.old_username_or_id,
+        _new_user_info.editor,
+        _new_user_info.old_username_or_id,
     ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
@@ -338,9 +338,9 @@ pub fn update_user(
     // updating the chat room info
     match diesel::update(users.filter(users::user_id.eq(user_old_info.user_id)))
         .set((
-            email.eq(&new_user_info.new_email),
-            password.eq(&new_user_info.new_password),
-            username.eq(&new_user_info.new_username),
+            email.eq(&_new_user_info.new_email),
+            password.eq(&_new_user_info.new_password),
+            username.eq(&_new_user_info.new_username),
         ))
         .returning(Users::as_returning())
         .get_result(_conn)
@@ -357,11 +357,15 @@ pub fn update_user(
 
 pub fn update_question(
     _conn: &mut PgConnection,
-    new_question_info: &UQuestion,
+    _new_question_info: &UQuestion,
 ) -> Result<Questions, Box<dyn std::error::Error>> {
     // checking the editor authority for editing the question
     let user_old_info: Users;
-    match check_authority(_conn, new_question_info.editor, new_question_info.rival_id) {
+    match check_authority(
+        _conn,
+        _new_question_info.editor,
+        _new_question_info.rival_id,
+    ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
@@ -371,29 +375,18 @@ pub fn update_question(
         }
     }
 
-    // preapring the deadline
-    let _deadline: NaiveDateTime;
-    match NaiveDateTime::parse_from_str(&new_question_info.deadline, "%Y-%m-%d %H:%M:%S") {
-        Ok(ndt) => _deadline = ndt,
-        Err(e) => {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                format!("couldnt parse the date time {:?}", e),
-            )))
-        }
-    }
-    let _question_id: i32;
+    let _question: Questions;
 
     match get_question(
         _conn,
         &QQuestions {
             question_id: None,
-            question_title: Some(new_question_info.question_title),
+            question_title: Some(_new_question_info.question_title),
             rival_id: Some(user_old_info.user_id),
             question_category: None,
         },
     ) {
-        Ok(qi) => _question_id = qi.question_id,
+        Ok(qi) => _question = qi,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
@@ -401,19 +394,39 @@ pub fn update_question(
             )))
         }
     }
+    // preparing the deadline, the deadline can only be increased
+    let _deadline: NaiveDateTime;
+    match NaiveDateTime::parse_from_str(&_new_question_info.deadline, "%Y-%m-%d %H:%M:%S") {
+        Ok(ndt) => {
+            if ndt < _question.deadline {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    format!("cant not decrease the deadline"),
+                )));
+            } else {
+                _deadline = ndt;
+            }
+        }
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("couldn't parse the date time {:?}", e),
+            )))
+        }
+    }
     // preparing the testcases
     let mut old_tcs: TestCases = Default::default();
-    match get_test_cases(_conn, _question_id) {
+    match get_test_cases(_conn, _question.question_id) {
         Ok(tc) => {
-            if new_question_info.test_inputs == "" {
+            if _new_question_info.test_inputs == "" {
                 old_tcs.test_inputs = tc.test_inputs
             } else {
-                old_tcs.test_inputs = new_question_info.test_inputs.to_string()
+                old_tcs.test_inputs = _new_question_info.test_inputs.to_string()
             }
-            if new_question_info.test_outputs == "" {
+            if _new_question_info.test_outputs == "" {
                 old_tcs.test_outputs = tc.test_outputs
             } else {
-                old_tcs.test_outputs = new_question_info.test_outputs.to_string()
+                old_tcs.test_outputs = _new_question_info.test_outputs.to_string()
             }
         }
         Err(e) => {
@@ -424,14 +437,14 @@ pub fn update_question(
         }
     }
     // updating the questions table
-    match diesel::update(questions.filter(questions::question_id.eq(_question_id)))
+    match diesel::update(questions.filter(questions::question_id.eq(_question.question_id)))
         .set((
-            question_title.eq(&new_question_info.question_title),
-            question_body.eq(&new_question_info.question_body),
+            question_title.eq(&_new_question_info.question_title),
+            question_body.eq(&_new_question_info.question_body),
             deadline.eq(&_deadline),
-            question_status.eq(&new_question_info.question_status),
-            daredevil.eq(&new_question_info.daredevil),
-            category.eq(&new_question_info.category),
+            question_status.eq(&_new_question_info.question_status),
+            daredevil.eq(&_new_question_info.daredevil),
+            category.eq(&_new_question_info.category),
         ))
         .returning(Questions::as_returning())
         .get_result(_conn)
@@ -466,14 +479,14 @@ pub fn update_question(
 // @dev this function will be used in case of the private key leakage
 pub fn update_user_wallet(
     _conn: &mut PgConnection,
-    new_user_wallet_info: &UWallets,
+    _new_user_wallet_info: &UWallets,
 ) -> Result<Wallets, Box<dyn std::error::Error>> {
     // checking the editor authority for editing the user info
     let user_old_info: Users;
     match check_authority(
         _conn,
-        new_user_wallet_info.editor,
-        new_user_wallet_info.username_or_id,
+        _new_user_wallet_info.editor,
+        _new_user_wallet_info.username_or_id,
     ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
@@ -486,7 +499,7 @@ pub fn update_user_wallet(
 
     // updating the chat room info
     match diesel::update(wallets.filter(wallets::user_id.eq(user_old_info.user_id)))
-        .set((sol_addr.eq(&new_user_wallet_info.new_sol_addr),))
+        .set((sol_addr.eq(&_new_user_wallet_info.new_sol_addr),))
         .returning(Wallets::as_returning())
         .get_result(_conn)
     {
@@ -504,77 +517,27 @@ pub fn update_user_wallet(
 // ------------- the multiple responses to a single question will be added as a feature in the future.{see ./future_features.md}
 
 // // general removers
-// pub fn delete_group_chat_room(
-//     _conn: &mut PgConnection,
-//     _chat_room_name: &String,
-//     remover_username: &String,
-// ) -> Result<bool, Box<dyn std::error::Error>> {
-//     let remover_user_id: i32;
-//     match get_user_with_username(_conn, remover_username) {
-//         Ok(res) => remover_user_id = res.user_id,
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
+pub fn delete_user(
+    _conn: &mut PgConnection,
+    _user_info: &RUsers,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    // checking the authority of the remover
+    let user_old_info: Users;
+    match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
 
-//     let _chat_room_id: i32;
-//     match get_group_chat_by_name(_conn, _chat_room_name) {
-//         Ok(res) => _chat_room_id = res.chat_room_id,
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
+    // the questions and the responses of the user wont be deleted
+    // the active questions will be set to the closed and will not be available to be answered any more
 
-//     match get_group_owner_by_id(_conn, _chat_room_id) {
-//         Ok(res) => {
-//             if remover_user_id != res {
-//                 return Err(Box::new(std::io::Error::new(
-//                     std::io::ErrorKind::PermissionDenied,
-//                     format!(
-//                         "user id {} is not allowed to delete the group",
-//                         remover_user_id
-//                     ),
-//                 )));
-//             }
-//         }
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::NotFound,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
-
-//     // deleting the members associated to the chat room group
-//     if let Err(e) = diesel::delete(
-//         chat_room_participants.filter(chat_room_participants::chat_room_id.eq(_chat_room_id)),
-//     )
-//     .execute(_conn)
-//     {
-//         return Err(Box::new(std::io::Error::new(
-//             std::io::ErrorKind::Other,
-//             format!("{:?}", e),
-//         )));
-//     }
-//     // deleting the room from the chat rooms table
-//     match diesel::delete(chat_rooms.filter(chat_rooms::chat_room_id.eq(_chat_room_id)))
-//         .execute(_conn)
-//     {
-//         Ok(_) => Ok(true),
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::Other,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
-// }
+    Ok(true)
+}
 
 // // custom ** setters
 // pub fn add_new_group_chat_room(
