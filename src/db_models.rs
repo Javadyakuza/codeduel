@@ -218,3 +218,9 @@ pub struct UQuestion<'a> {
     pub test_inputs: &'a str,        // if empty will not be updated
     pub test_outputs: &'a str,       // if empty will not be updated
 }
+
+pub struct UWallets<'a> {
+    pub editor: &'a str,
+    pub username_or_id: &'a str,
+    pub new_sol_addr: &'a str,
+}

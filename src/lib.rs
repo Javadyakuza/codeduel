@@ -7,7 +7,7 @@ use crate::db_models::{
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::{Local, NaiveDate, NaiveDateTime};
-use db_models::{Categories, QQuestions, QResponses, UQuestion, UUser};
+use db_models::{Categories, QQuestions, QResponses, UQuestion, UUser, UWallets};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -463,8 +463,45 @@ pub fn update_question(
     }
 }
 
-// @dev (the responses will not get updated once they are submitted)
-// the multiple responses to a single question will be added as a feature in the future.{see ./future_features.md}
+// @dev this function will be used in case of the private key leakage
+pub fn update_user_wallet(
+    _conn: &mut PgConnection,
+    new_user_wallet_info: &UWallets,
+) -> Result<Wallets, Box<dyn std::error::Error>> {
+    // checking the editor authority for editing the user info
+    let user_old_info: Users;
+    match check_authority(
+        _conn,
+        new_user_wallet_info.editor,
+        new_user_wallet_info.username_or_id,
+    ) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+
+    // updating the chat room info
+    match diesel::update(wallets.filter(wallets::user_id.eq(user_old_info.user_id)))
+        .set((sol_addr.eq(&new_user_wallet_info.new_sol_addr),))
+        .returning(Wallets::as_returning())
+        .get_result(_conn)
+    {
+        Ok(nu) => Ok(nu),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+}
+
+// ------------- @dev (the responses will not get updated once they are submitted)
+// ------------- the multiple responses to a single question will be added as a feature in the future.{see ./future_features.md}
 
 // // general removers
 // pub fn delete_group_chat_room(
