@@ -463,6 +463,9 @@ pub fn update_question(
     }
 }
 
+// @dev (the responses will not get updated once they are submitted)
+// the multiple responses to a single question will be added as a feature in the future.{see ./future_features.md}
+
 // // general removers
 // pub fn delete_group_chat_room(
 //     _conn: &mut PgConnection,
