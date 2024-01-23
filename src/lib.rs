@@ -226,10 +226,11 @@ pub fn get_response(
 pub fn get_question(
     _conn: &mut PgConnection,
     _query_struct: &QQuestions,
-) -> Result<Questions, Box<dyn std::error::Error>> {
+) -> Result<Vec<Questions>, Box<dyn std::error::Error>> {
     // todo!("formatting the question title");
     // checking the format of the struct
-    if !QQuestions::is_correct_structures(_query_struct) {
+    let _mod = QQuestions::is_correct_structures(_query_struct);
+    if _mod == 0 {
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
             "the question query format is wrong ! \n
@@ -239,7 +240,7 @@ pub fn get_question(
             3 - None(question_id), None(question_titel), None(rival_id), Some(question_category)",
         )));
     } else {
-        if _query_struct.question_id.is_some() {
+        if _mod == 1 {
             // searching by the question id
             let tmp_questions: Vec<Questions> = questions
                 .filter(questions::question_id.eq(_query_struct.question_id.unwrap())) // panic impossible
@@ -253,9 +254,9 @@ pub fn get_question(
                     "question not found !",
                 )))
             } else {
-                Ok(tmp_questions[0].to_owned())
+                Ok(tmp_questions.to_owned())
             }
-        } else if _query_struct.question_title.is_some() {
+        } else if _mod == 2 {
             // searching by the rival id and title of the question
             let tmp_questions: Vec<Questions> = questions
                 .filter(questions::rival_id.eq(_query_struct.rival_id.unwrap())) // panic impossible
@@ -270,7 +271,23 @@ pub fn get_question(
                     "question not found !",
                 )))
             } else {
-                Ok(tmp_questions[0].to_owned())
+                Ok(tmp_questions.to_owned())
+            }
+        } else if _mod == 3 {
+            // searching by the category
+            let tmp_questions: Vec<Questions> = questions
+                .filter(questions::rival_id.eq(_query_struct.rival_id.unwrap())) // panic impossible
+                .select(Questions::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_questions.len() == 0 {
+                // question doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "question not found !",
+                )))
+            } else {
+                Ok(tmp_questions.to_owned())
             }
         } else {
             // searching by the category
@@ -288,7 +305,7 @@ pub fn get_question(
                     "question not found !",
                 )))
             } else {
-                Ok(tmp_questions[0].to_owned())
+                Ok(tmp_questions.to_owned())
             }
         }
     }
@@ -532,10 +549,27 @@ pub fn delete_user(
             )))
         }
     }
-    
+
     // the questions and the responses of the user wont be deleted
     // the user can not remove the designed questions, the user must wait until the highest deadline amount.
-    
+    let _question: Questions;
+    match get_question(
+        _conn,
+        &QQuestions {
+            question_id: None,
+            question_title: None,
+            rival_id: Some(user_old_info.user_id),
+            question_category: None,
+        },
+    ) {
+        Ok(q) => _question = q,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                format!("user must wait until the highest dead line {:?}", e),
+            )))
+        }
+    }
 
     Ok(true)
 }

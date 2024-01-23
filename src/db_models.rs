@@ -131,23 +131,23 @@ pub struct QResponses {
 }
 
 impl QResponses {
-    pub fn is_correct_structures(instance: &QResponses) -> bool {
+    pub fn is_correct_structures(instance: &QResponses) -> i32 {
         match (
             instance.question_id.is_some(),
             !instance.response_id.is_some(),
             !instance.daredevil_id.is_some(),
         ) {
             // Case 1: All fields are present
-            (true, false, false) => true,
+            (true, false, false) => 1,
 
             // Case 2: Question ID and Daredevil ID are present
-            (false, true, true) => true,
+            (false, true, true) => 2,
 
             // Case 3: Response ID and Daredevil ID are present
-            (false, false, true) => true,
+            (false, false, true) => 3,
 
             // None of the fields are present
-            _ => false,
+            _ => 0,
         }
     }
 }
@@ -181,7 +181,7 @@ pub struct QQuestions<'a> {
     // mod 4 = None, None, None, Some => get all questions or a certain category of the questions.
 }
 impl QQuestions<'_> {
-    pub fn is_correct_structures(instance: &QQuestions) -> bool {
+    pub fn is_correct_structures(instance: &QQuestions) -> i32 {
         match (
             instance.question_id.is_some(),
             !instance.question_title.is_some(),
@@ -189,19 +189,19 @@ impl QQuestions<'_> {
             !instance.question_category.is_some(),
         ) {
             // Case 1: All fields are present
-            (true, false, false, false) => true,
+            (true, false, false, false) => 1,
 
             // Case 2: Question ID, Rival ID, and Question Category are present
-            (false, true, true, false) => true,
+            (false, true, true, false) => 2,
 
             // Case 3: Question Title, Rival ID, and Question Category are present
-            (false, false, true, false) => true,
+            (false, false, true, false) => 3,
 
             // Case 4: Question Title and Rival ID are present
-            (false, false, false, true) => true,
+            (false, false, false, true) => 4,
 
             // None of the fields are present
-            _ => false,
+            _ => 0,
         }
     }
 }
