@@ -208,13 +208,13 @@ pub struct UUser<'a> {
 pub struct UQuestion<'a> {
     pub editor: &'a str,
     pub rival_id: &'a str,
-    pub old_question_title: &'a str,
-    pub question_title: &'a str,
-    pub question_body: &'a str,
-    pub deadline: &'a str,
-    pub question_status: i32,
-    pub daredevil: Option<i32>,
-    pub category: &'a str,
-    pub test_inputs: &'a str,  // if empty will not be updated
-    pub test_outputs: &'a str, // if empty will not be updated
+    pub old_question_title: &'a str, // fetched from fe
+    pub question_title: &'a str,     // fetched from fe
+    pub question_body: &'a str,      // fetched from fe
+    pub deadline: &'a str,           // fetched from fe
+    pub question_status: i32,        // fetched from fe
+    pub daredevil: Option<i32>,      // fetched from fe
+    pub category: &'a str,           // fetched from fe
+    pub test_inputs: &'a str,        // if empty will not be updated
+    pub test_outputs: &'a str,       // if empty will not be updated
 }

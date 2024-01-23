@@ -64,10 +64,4 @@ diesel::joinable!(responses -> users (daredevil_id));
 diesel::joinable!(test_cases -> questions (question_id));
 diesel::joinable!(wallets -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    questions,
-    responses,
-    test_cases,
-    users,
-    wallets,
-);
+diesel::allow_tables_to_appear_in_same_query!(questions, responses, test_cases, users, wallets,);

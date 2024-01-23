@@ -24,8 +24,8 @@ CREATE TABLE responses (
     response_code TEXT NOT NULL,
     correctness BOOLEAN NOT NULL,
     creation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_daredevil_question UNIQUE (daredevil_id, question_id)
 );
-
 CREATE TABLE test_cases (
     test_case_id SERIAL PRIMARY KEY NOT NULL,
     question_id INTEGER NOT NULL REFERENCES questions(question_id),
