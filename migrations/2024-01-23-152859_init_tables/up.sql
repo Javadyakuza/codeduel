@@ -4,7 +4,8 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     total_payed INTEGER NOT NULL DEFAULT 0,
-    total_claimed INTEGER NOT NULL DEFAULT 0
+    total_claimed INTEGER NOT NULL DEFAULT 0, 
+    total_unclaimed INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE questions (
     question_id SERIAL PRIMARY KEY NOT NULL,

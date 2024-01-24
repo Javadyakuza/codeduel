@@ -599,6 +599,13 @@ pub fn delete_user(
             }
         }
     };
+    // user must claim all of the unclaimed tokens from the prize pool
+    if let Err(e) = delete_user_wallet(_conn, _user_info) {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("{:?}", e),
+        )));
+    }
     match update_user(
         _conn,
         &UUser {
