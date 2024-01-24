@@ -2,6 +2,8 @@
     "rust-analyzer.showUnlinkedFileNotification": false,
     "cSpell.words": [
         "chrono",
+        "dotenv",
+        "dotenvy",
         "insertable",
         "solana"
     ]
