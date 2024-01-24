@@ -7,7 +7,9 @@ use crate::db_models::{
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::{Local, NaiveDate, NaiveDateTime};
-use db_models::{Categories, QQuestions, QResponses, RUsers, UQuestion, UUser, UWallets};
+use db_models::{
+    Categories, QQuestions, QResponses, RQuestions, RUsers, UQuestion, UUser, UWallets,
+};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -672,7 +674,63 @@ pub fn delete_user_wallet(
     }
 }
 
-// questions can not be deleted
+pub fn delete_question(
+    _conn: &mut PgConnection,
+    _question_info: &RQuestions,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    // checking the authority of the remover
+    let user_old_info: Users;
+    match check_authority(_conn, _question_info.remover, _question_info.rival_id) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+    let _question: Vec<Questions>;
+    match get_question(
+        _conn,
+        &QQuestions {
+            question_id: None,
+            question_title: Some(_question_info.question_title),
+            rival_id: Some(user_old_info.user_id),
+            question_category: None,
+        },
+    ) {
+        Ok(q) => {
+            if q[0].prize_pool != 0 {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("the question has already obtained tokens in the prize pool, question can not be deleted"),
+                )));
+            }
+            _question = q
+        }
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+
+    // checking if the question is not having any tokens obtained
+    match diesel::delete(questions.filter(questions::question_id.eq(_question[0].question_id)))
+        .execute(_conn)
+    {
+        Ok(_) => Ok(true),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("couldn't delete the question \n {:?}", e),
+            )))
+        }
+    }
+}
+
+// @dev (responses can not be deleted)
 // // custom ** setters
 // pub fn add_new_group_chat_room(
 //     _conn: &mut PgConnection,

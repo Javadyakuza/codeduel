@@ -253,3 +253,9 @@ pub struct RUsers<'a> {
     pub remover: &'a str,
     pub username_or_id: &'a str,
 }
+
+pub struct RQuestions<'a> {
+    pub remover: &'a str,
+    pub rival_id: &'a str,
+    pub question_title: &'a str, // fetched from fe
+}
