@@ -42,6 +42,10 @@ pub struct Questions {
     pub daredevil: Option<i32>,
     pub category: String,
 }
+pub const OPEN_UNSOLVED: i32 = 1;
+pub const OPEN_SOLVED: i32 = 2;
+pub const CLOSED_UNSOLVED: i32 = 1;
+pub const CLOSED_SOLVED: i32 = 1;
 
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Default)]
 #[diesel(table_name = crate::schema::test_cases)]

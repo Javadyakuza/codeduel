@@ -552,8 +552,8 @@ pub fn delete_user(
 
     // the questions and the responses of the user wont be deleted
     // the user can not remove the designed questions, the user must wait until the highest deadline amount.
-    let _question: Questions;
-    match get_question(
+    // the user will not be deleted, its user information will be changed to the "deleted", it is being referenced by other tables fields.
+    if let Ok(qs) = get_question(
         _conn,
         &QQuestions {
             question_id: None,
@@ -562,16 +562,33 @@ pub fn delete_user(
             question_category: None,
         },
     ) {
-        Ok(q) => _question = q,
+        for q in qs.iter() {
+            if q.question_status < 3 {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    format!("rival has a open question, must wait until the deadline"),
+                )));
+            }
+        }
+    };
+    match update_user(
+        _conn,
+        &UUser {
+            old_username_or_id: user_old_info.username.as_str(),
+            new_email: "deleted",
+            new_password: "deleted",
+            new_username: "deleted",
+            editor: user_old_info.username.as_str(),
+        },
+    ) {
+        Ok(_) => Ok(true),
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::PermissionDenied,
-                format!("user must wait until the highest dead line {:?}", e),
+                std::io::ErrorKind::Other,
+                format!("couldn't delete the user \n {:?}", e),
             )))
         }
     }
-
-    Ok(true)
 }
 
 // // custom ** setters
