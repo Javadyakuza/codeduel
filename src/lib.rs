@@ -176,9 +176,10 @@ pub fn get_user(
 pub fn get_response(
     _conn: &mut PgConnection,
     _query_struct: &QResponses,
-) -> Result<Responses, Box<dyn std::error::Error>> {
+) -> Result<Vec<Responses>, Box<dyn std::error::Error>> {
     // checking the format of the struct
-    if !QResponses::is_correct_structures(_query_struct) {
+    let _mod = QResponses::is_correct_structures(_query_struct);
+    if _mod == 0 {
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
             "the response query format is wrong ! \n
@@ -187,7 +188,22 @@ pub fn get_response(
             2 - None(question_id), Some(response_id), Some(daredevil_id)",
         )));
     } else {
-        if _query_struct.question_id.is_none() {
+        if _mod == 1 {
+            let tmp_responses: Vec<Responses> = responses
+                .filter(responses::response_id.eq(_query_struct.response_id.unwrap())) // panic impossible
+                .select(Responses::as_select())
+                .load(_conn)
+                .unwrap_or(vec![]);
+            if tmp_responses.len() == 0 {
+                // response doesn't exists
+                Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "no responses found !",
+                )))
+            } else {
+                Ok(tmp_responses.to_owned())
+            }
+        } else if _mod == 2 {
             // searching by the daredevil id
             let tmp_responses: Vec<Responses> = responses
                 .filter(responses::question_id.eq(_query_struct.question_id.unwrap())) // panic impossible
@@ -199,14 +215,16 @@ pub fn get_response(
                 // response doesn't exists
                 Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
-                    "response not found !",
+                    "no responses found !",
                 )))
             } else {
-                Ok(tmp_responses[0].to_owned())
+                Ok(tmp_responses.to_owned())
             }
         } else {
+            // getting all of the responses of the daredevil
+            // searching by the daredevil id
             let tmp_responses: Vec<Responses> = responses
-                .filter(responses::response_id.eq(_query_struct.response_id.unwrap())) // panic impossible
+                .filter(responses::daredevil_id.eq(_query_struct.daredevil_id.unwrap())) // panic impossible
                 .select(Responses::as_select())
                 .load(_conn)
                 .unwrap_or(vec![]);
@@ -214,10 +232,10 @@ pub fn get_response(
                 // response doesn't exists
                 Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
-                    "response not found !",
+                    "no responses found !",
                 )))
             } else {
-                Ok(tmp_responses[0].to_owned())
+                Ok(tmp_responses.to_owned())
             }
         }
     }
@@ -392,7 +410,7 @@ pub fn update_question(
         }
     }
 
-    let _question: Questions;
+    let _question: Vec<Questions>;
 
     match get_question(
         _conn,
@@ -415,7 +433,7 @@ pub fn update_question(
     let _deadline: NaiveDateTime;
     match NaiveDateTime::parse_from_str(&_new_question_info.deadline, "%Y-%m-%d %H:%M:%S") {
         Ok(ndt) => {
-            if ndt < _question.deadline {
+            if ndt < _question[0].deadline {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
                     format!("cant not decrease the deadline"),
@@ -433,7 +451,7 @@ pub fn update_question(
     }
     // preparing the testcases
     let mut old_tcs: TestCases = Default::default();
-    match get_test_cases(_conn, _question.question_id) {
+    match get_test_cases(_conn, _question[0].question_id) {
         Ok(tc) => {
             if _new_question_info.test_inputs == "" {
                 old_tcs.test_inputs = tc.test_inputs
@@ -454,7 +472,7 @@ pub fn update_question(
         }
     }
     // updating the questions table
-    match diesel::update(questions.filter(questions::question_id.eq(_question.question_id)))
+    match diesel::update(questions.filter(questions::question_id.eq(_question[0].question_id)))
         .set((
             question_title.eq(&_new_question_info.question_title),
             question_body.eq(&_new_question_info.question_body),
