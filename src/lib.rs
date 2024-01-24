@@ -663,6 +663,7 @@ pub fn delete_user_wallet(
     }
 }
 
+// questions can not be deleted
 // // custom ** setters
 // pub fn add_new_group_chat_room(
 //     _conn: &mut PgConnection,

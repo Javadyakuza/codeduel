@@ -16,6 +16,9 @@ CREATE TABLE questions (
     deadline TIMESTAMP NOT NULL,
     question_status INTEGER NOT NULL DEFAULT 1,
     daredevil INTEGER DEFAULT NULL,
+    reward INTEGER NOT NULL,
+    prize_pool INTEGER NOT NULL DEFAULT 0,
+    entrance_fee INTEGER NOT NULL, 
     category VARCHAR(64) NOT NULL
 );
 CREATE TABLE responses (

@@ -11,6 +11,9 @@ diesel::table! {
         deadline -> Timestamp,
         question_status -> Int4,
         daredevil -> Nullable<Int4>,
+        reward -> Int4,
+        prize_pool -> Int4,
+        entrance_fee -> Int4,
         #[max_length = 64]
         category -> Varchar,
     }
