@@ -3,6 +3,11 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
+pub const OPEN_UNSOLVED: i32 = 1;
+pub const OPEN_SOLVED: i32 = 2;
+pub const CLOSED_UNSOLVED: i32 = 1;
+pub const CLOSED_SOLVED: i32 = 1;
+
 // ------------------------------- general models ----------------------------
 // the following models will represent the actual schema of the tables in terms of the rust structs.
 #[derive(Queryable, Selectable, Debug, Insertable, Clone)]
@@ -37,12 +42,11 @@ pub struct Questions {
     pub deadline: NaiveDateTime,
     pub question_status: i32,
     pub daredevil: Option<i32>,
+    pub reward: i32,
+    pub prize_pool: i32,
+    pub entrance_fee: i32,
     pub category: String,
 }
-pub const OPEN_UNSOLVED: i32 = 1;
-pub const OPEN_SOLVED: i32 = 2;
-pub const CLOSED_UNSOLVED: i32 = 1;
-pub const CLOSED_SOLVED: i32 = 1;
 
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Default)]
 #[diesel(table_name = crate::schema::test_cases)]
@@ -96,6 +100,8 @@ pub struct IQuestions {
     pub question_status: i32,
     pub daredevil: Option<i32>,
     pub category: String,
+    pub reward: i32,
+    pub entrance_fee: i32,
 }
 
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
@@ -116,8 +122,6 @@ pub struct IUsers {
     pub email: String,
     pub username: String,
     pub password: String,
-    pub total_payed: i32,
-    pub total_claimed: i32,
 }
 
 // ------------------------------- queryable models ----------------------------
@@ -221,15 +225,17 @@ pub struct UUser<'a> {
     pub editor: &'a str,
 }
 
+// @notice "fetched from fe" means the same old values will be fetched and sent to backend by the front end application
 pub struct UQuestion<'a> {
     pub editor: &'a str,
     pub rival_id: &'a str,
     pub old_question_title: &'a str, // fetched from fe
     pub question_title: &'a str,     // fetched from fe
     pub question_body: &'a str,      // fetched from fe
-    pub deadline: &'a str,           // fetched from fe
+    pub deadline: &'a str,           // checked in the backend
     pub question_status: i32,        // fetched from fe
-    pub daredevil: Option<i32>,      // fetched from fe
+    pub daredevil: i32,              // fetched from fe, zero is considered as no daredevil
+    pub prize_pool: i32,             // fetched from fe
     pub category: &'a str,           // fetched from fe
     pub test_inputs: &'a str,        // if empty will not be updated
     pub test_outputs: &'a str,       // if empty will not be updated

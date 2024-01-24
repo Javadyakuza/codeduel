@@ -439,6 +439,7 @@ pub fn update_question(
             )))
         }
     }
+
     // preparing the deadline, the deadline can only be increased
     let _deadline: NaiveDateTime;
     match NaiveDateTime::parse_from_str(&_new_question_info.deadline, "%Y-%m-%d %H:%M:%S") {
@@ -458,6 +459,13 @@ pub fn update_question(
                 format!("couldn't parse the date time {:?}", e),
             )))
         }
+    }
+    // the new prize pool amount can only be increased
+    if _question[0].prize_pool < _new_question_info.prize_pool {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "prize pool amount can only be increased !",
+        )));
     }
     // preparing the test-cases
     let mut old_tcs: TestCases = Default::default();
@@ -484,12 +492,13 @@ pub fn update_question(
     // updating the questions table
     match diesel::update(questions.filter(questions::question_id.eq(_question[0].question_id)))
         .set((
-            question_title.eq(&_new_question_info.question_title),
-            question_body.eq(&_new_question_info.question_body),
-            deadline.eq(&_deadline),
-            question_status.eq(&_new_question_info.question_status),
-            daredevil.eq(&_new_question_info.daredevil),
-            category.eq(&_new_question_info.category),
+            question_title.eq(&_new_question_info.question_title), // check unnecessary
+            question_body.eq(&_new_question_info.question_body),   // check unnecessary
+            deadline.eq(&_deadline),                               // checked
+            question_status.eq(&_new_question_info.question_status), // check unnecessary
+            prize_pool.eq(_new_question_info.prize_pool),          //checked
+            daredevil.eq(&_new_question_info.daredevil),           // check unnecessary
+            category.eq(&_new_question_info.category),             // check unnecessary
         ))
         .returning(Questions::as_returning())
         .get_result(_conn)
@@ -497,8 +506,8 @@ pub fn update_question(
         Ok(nq) => {
             match diesel::update(test_cases.filter(test_cases::question_id.eq(nq.question_id)))
                 .set((
-                    test_inputs.eq(&old_tcs.test_inputs),
-                    test_outputs.eq(&old_tcs.test_outputs),
+                    test_inputs.eq(&old_tcs.test_inputs),   // checked
+                    test_outputs.eq(&old_tcs.test_outputs), // checked
                 ))
                 .returning(TestCases::as_returning())
                 .get_result(_conn)
