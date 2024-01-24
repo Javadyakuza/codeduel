@@ -1,9 +1,6 @@
 use diesel::prelude::*;
 // use merge_derivable;
-use crate::schema::{questions, responses, test_cases, users};
 use chrono::NaiveDateTime;
-use diesel::dsl::sql;
-use diesel::pg::Pg;
 use serde::{Deserialize, Serialize};
 
 // ------------------------------- general models ----------------------------
@@ -67,6 +64,7 @@ pub struct Users {
     pub password: String,
     pub total_payed: i32,
     pub total_claimed: i32,
+    pub total_unclaimed: i32,
 }
 
 // ------------------------------- insertable models ----------------------------
@@ -217,6 +215,9 @@ pub struct UUser<'a> {
     pub new_email: &'a str,
     pub new_password: &'a str,
     pub new_username: &'a str,
+    pub new_total_payed: i32,
+    pub new_total_claimed: i32,
+    pub new_total_unclaimed: i32,
     pub editor: &'a str,
 }
 

@@ -600,6 +600,12 @@ pub fn delete_user(
         }
     };
     // user must claim all of the unclaimed tokens from the prize pool
+    if user_old_info.total_unclaimed != 0 {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "user must claim all of the un-claimed tokens of the reserve pool",
+        )));
+    }
     if let Err(e) = delete_user_wallet(_conn, _user_info) {
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,
@@ -613,6 +619,9 @@ pub fn delete_user(
             new_email: "deleted",
             new_password: "deleted",
             new_username: "deleted",
+            new_total_payed: user_old_info.total_payed, // same as before
+            new_total_claimed: user_old_info.total_claimed, // same as before
+            new_total_unclaimed: user_old_info.total_unclaimed, // same as before
             editor: user_old_info.username.as_str(),
         },
     ) {
@@ -625,6 +634,7 @@ pub fn delete_user(
         }
     }
 }
+
 pub fn delete_user_wallet(
     _conn: &mut PgConnection,
     _user_info: &RUsers,
