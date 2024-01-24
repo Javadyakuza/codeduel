@@ -150,6 +150,11 @@ pub fn get_user(
                     std::io::ErrorKind::NotFound,
                     "user id not found !",
                 )));
+            } else if tmp_users[0].username.as_str() == "deleted" {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "user is deleted",
+                )));
             } else {
                 return Ok(tmp_users[0].to_owned());
             }
@@ -165,6 +170,11 @@ pub fn get_user(
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
                     "username not found !",
+                )));
+            } else if tmp_users[0].username.as_str() == "deleted" {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "user is deleted",
                 )));
             } else {
                 return Ok(tmp_users[0].to_owned());
