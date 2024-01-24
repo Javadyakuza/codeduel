@@ -164,6 +164,7 @@ pub enum Categories {
     SolanaPrograms,
     Rust,
 }
+
 impl Categories {
     pub fn to_string(category: Option<&Self>) -> String {
         match category {
@@ -186,6 +187,7 @@ pub struct QQuestions<'a> {
     // mod 3 = None, None, Some, None => get all of the rival questions
     // mod 4 = None, None, None, Some => get all questions or a certain category of the questions.
 }
+
 impl QQuestions<'_> {
     pub fn is_correct_structures(instance: &QQuestions) -> i32 {
         match (

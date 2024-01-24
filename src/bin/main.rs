@@ -12,19 +12,25 @@ use rocket::*;
 use rocket_contrib::json::Json;
 // use solana_sdk::signature::Signature;
 
-// #[get("/user-via-username/<username>")]
-// fn get_user_via_username(username: String) -> Json<Result<QUsers, String>> {
-//     let mut conn = establish_connection();
-//     match get_user_with_username(&mut conn, username.as_str()) {
-//         Ok(res) => return Json(Ok(res)),
-//         Err(e) => return Json(Err(format!("{:?}", e))),
-//     }
-// }
+// ------------- get gateways ----------
+#[get("/get_user/<username_or_id>")]
+fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
+    let mut conn = establish_connection();
+    match get_user(&mut conn, username_or_id.as_str()) {
+        Ok(res) => return Json(Ok(res)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+#[catch(404)]
+fn not_found(req: &Request) -> String {
+    format!("Oh no , we don't know where is {} url ", req.uri())
+}
+
 fn main() {
-    // rocket::ignite()
-    //     .register(catchers![not_found])
-    //     .mount("/api", routes![])
-    //     // .attach(DbConn::fairing())
-    //     .launch();
-    // needs the "cargo build and then cargo run to be ran oin the fucking serve"
+    rocket::ignite()
+        .register(catchers![not_found])
+        .mount("/api", routes![get_user_ep])
+        // .attach(DbConn::fairing())
+        .launch();
 }
