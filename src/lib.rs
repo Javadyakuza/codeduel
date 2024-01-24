@@ -265,7 +265,7 @@ pub fn get_question(
             supported formats: \n
             1 - Some(question_id), None(question_title), None(rival_id), None(question_category) \n
             2 - None(question_id), Some(question_title), Some(rival_id), None(question_category) \n 
-            3 - None(question_id), None(question_titel), None(rival_id), Some(question_category)",
+            3 - None(question_id), None(question_title), None(rival_id), Some(question_category)",
         )));
     } else {
         if _mod == 1 {
@@ -459,7 +459,7 @@ pub fn update_question(
             )))
         }
     }
-    // preparing the testcases
+    // preparing the test-cases
     let mut old_tcs: TestCases = Default::default();
     match get_test_cases(_conn, _question[0].question_id) {
         Ok(tc) => {
@@ -618,6 +618,33 @@ pub fn delete_user(
         }
     }
 }
+pub fn delete_user_wallet(
+    _conn: &mut PgConnection,
+    _user_info: &RUsers,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    // checking the authority of the remover
+    let user_old_info: Users;
+    match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+
+    match diesel::delete(wallets.filter(wallets::user_id.eq(user_old_info.user_id))).execute(_conn)
+    {
+        Ok(_) => Ok(true),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("couldn't delete the user wallet \n {:?}", e),
+            )))
+        }
+    }
+}
 
 // // custom ** setters
 // pub fn add_new_group_chat_room(
@@ -718,7 +745,7 @@ pub fn check_authority(
                 } else {
                     return Err(Box::new(std::io::Error::new(
                         std::io::ErrorKind::PermissionDenied,
-                        format!("edit premission denied for user id {}", _1),
+                        format!("edit permission denied for user id {}", _1),
                     )));
                 }
             }
