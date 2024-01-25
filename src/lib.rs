@@ -6,6 +6,7 @@ use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
+use api_models::EpOutQuestions;
 use chrono::NaiveDateTime;
 use db_models::{
     Categories, QQuestions, QResponses, RQuestions, RUsers, UQuestion, UUser, UWallets,
@@ -288,10 +289,13 @@ pub fn get_question(
             // searching by the rival id and title of the question
             let tmp_questions: Vec<Questions> = questions
                 .filter(questions::rival_id.eq(_query_struct.rival_id.unwrap())) // panic impossible
-                .filter(questions::question_title.eq(_query_struct.question_title.unwrap())) // panic impossible
+                .filter(
+                    questions::question_title.eq(_query_struct.question_title.as_ref().unwrap()),
+                ) // panic impossible
                 .select(Questions::as_select())
                 .load(_conn)
                 .unwrap_or(vec![]);
+            
             if tmp_questions.len() == 0 {
                 // response doesn't exists
                 Err(Box::new(std::io::Error::new(
@@ -426,7 +430,7 @@ pub fn update_question(
         _conn,
         &QQuestions {
             question_id: None,
-            question_title: Some(_new_question_info.question_title),
+            question_title: Some(_new_question_info.question_title.to_string()),
             rival_id: Some(user_old_info.user_id),
             question_category: None,
         },
@@ -692,7 +696,7 @@ pub fn delete_question(
         _conn,
         &QQuestions {
             question_id: None,
-            question_title: Some(_question_info.question_title),
+            question_title: Some(_question_info.question_title.to_string()),
             rival_id: Some(user_old_info.user_id),
             question_category: None,
         },

@@ -1,7 +1,12 @@
+use std::str::FromStr;
+
 use diesel::prelude::*;
 // use merge_derivable;
 use chrono::NaiveDateTime;
+use rocket::FromForm;
 use serde::{Deserialize, Serialize};
+
+use crate::api_models::EpInQuestions;
 
 pub const OPEN_UNSOLVED: i32 = 1;
 pub const OPEN_SOLVED: i32 = 2;
@@ -29,6 +34,7 @@ pub struct Responses {
     pub correctness: bool,
     pub creation_time: NaiveDateTime,
 }
+
 
 #[derive(Queryable, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::questions)]
@@ -176,10 +182,20 @@ impl Categories {
             _ => "All".to_string(),
         }
     }
+    pub fn from_string(category: &str) -> Categories {
+        match category {
+            "All" => Self::All,
+            "Rust" => Self::Rust,
+            "SolanaPrograms" => Self::SolanaPrograms,
+
+            _ => Self::All,
+        }
+    }
 }
-pub struct QQuestions<'a> {
+#[derive(Default)]
+pub struct QQuestions {
     pub question_id: Option<i32>,
-    pub question_title: Option<&'a str>,
+    pub question_title: Option<String>, // the queryable title does not have any fixed length.
     pub rival_id: Option<i32>,
     pub question_category: Option<Categories>,
     // mod 1 = Some, None, None, None => search by the question id.
@@ -188,7 +204,7 @@ pub struct QQuestions<'a> {
     // mod 4 = None, None, None, Some => get all questions or a certain category of the questions.
 }
 
-impl QQuestions<'_> {
+impl QQuestions {
     pub fn is_correct_structures(instance: &QQuestions) -> i32 {
         match (
             instance.question_id.is_some(),
@@ -210,6 +226,45 @@ impl QQuestions<'_> {
 
             // None of the fields are present
             _ => 0,
+        }
+    }
+    pub fn clone(self) -> Self {
+        Self {
+            question_id: self.question_id,
+            question_title: self.question_title.clone(),
+            rival_id: self.rival_id,
+            question_category: self.question_category.clone(),
+        }
+    }
+    pub fn build_from_ep(ep_question: &EpInQuestions) -> Self {
+        let mut qq: QQuestions = Default::default();
+        if ep_question.question_id == 0 {
+            qq.question_id = None;
+        } else {
+            qq.question_id = Some(ep_question.question_id);
+        }
+        if &ep_question.question_title == "" {
+            qq.question_title = None;
+        } else {
+            qq.question_title = Some(ep_question.question_title.clone());
+        }
+        if ep_question.rival_id == 0 {
+            qq.rival_id = None;
+        } else {
+            qq.rival_id = Some(ep_question.rival_id);
+        }
+        if ep_question.question_category == "" {
+            qq.question_category = Some(Categories::All);
+        } else {
+            qq.question_category = Some(Categories::from_string(
+                ep_question.question_category.as_str(),
+            ));
+        }
+        Self {
+            question_id: qq.question_id,
+            question_title: qq.question_title,
+            rival_id: qq.rival_id,
+            question_category: qq.question_category,
         }
     }
 }

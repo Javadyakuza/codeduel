@@ -2,6 +2,7 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
+use codeduel_backend::api_models::{EpInQuestions, EpOutQuestions};
 // use codeduel_backend::api_models::*;
 use codeduel_backend::db_models::*;
 // use codeduel_backend::wallet_lib::*;
@@ -22,6 +23,17 @@ fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
     }
 }
 
+#[post("/get_question", data = "<queryable_question>")]
+fn get_question_ep(
+    queryable_question: Form<EpInQuestions>,
+) -> Json<Result<Vec<EpOutQuestions>, String>> {
+    let mut conn = establish_connection();
+
+    match get_question(&mut conn, &QQuestions::build_from_ep(&*queryable_question)) {
+        Ok(res) => return Json(Ok(EpOutQuestions::from_questions(res))),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
 #[catch(404)]
 fn not_found(req: &Request) -> String {
     format!("Oh no , we don't know where is {} url ", req.uri())
