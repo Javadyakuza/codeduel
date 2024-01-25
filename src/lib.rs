@@ -6,7 +6,6 @@ use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
-use api_models::EpOutQuestions;
 use chrono::NaiveDateTime;
 use db_models::{
     Categories, QQuestions, QResponses, RQuestions, RUsers, UQuestion, UUser, UWallets,

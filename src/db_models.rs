@@ -1,12 +1,12 @@
-use std::str::FromStr;
+use std::{ops::Deref, str::FromStr};
 
 use diesel::prelude::*;
 // use merge_derivable;
+use crate::api_models::{EpInQuestions, EpQuQuestions, NaiveDateForm};
 use chrono::NaiveDateTime;
 use rocket::FromForm;
+use rocket::{http::RawStr, request::FromFormValue};
 use serde::{Deserialize, Serialize};
-
-use crate::api_models::EpInQuestions;
 
 pub const OPEN_UNSOLVED: i32 = 1;
 pub const OPEN_SOLVED: i32 = 2;
@@ -91,7 +91,7 @@ pub struct IResponses {
     pub creation_time: NaiveDateTime,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IQuestions {
@@ -108,7 +108,21 @@ pub struct IQuestions {
     pub reward: i32,
     pub entrance_fee: i32,
 }
-
+impl IQuestions {
+    pub fn from_ep_in_question(ep_q: EpInQuestions) -> Self {
+        Self {
+            rival_id: ep_q.rival_id,
+            question_title: ep_q.question_title,
+            question_body: ep_q.question_body,
+            deadline: *ep_q.deadline.deref(),
+            question_status: ep_q.question_status,
+            daredevil: ep_q.daredevil,
+            category: ep_q.category,
+            reward: ep_q.reward,
+            entrance_fee: ep_q.entrance_fee,
+        }
+    }
+}
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -163,7 +177,7 @@ impl QResponses {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub enum Categories {
     All,
     SolanaPrograms,
@@ -191,7 +205,7 @@ impl Categories {
         }
     }
 }
-#[derive(Default)]
+#[derive(Default, Serialize)]
 pub struct QQuestions {
     pub question_id: Option<i32>,
     pub question_title: Option<String>, // the queryable title does not have any fixed length.
@@ -235,7 +249,7 @@ impl QQuestions {
             question_category: self.question_category.clone(),
         }
     }
-    pub fn build_from_ep(ep_question: &EpInQuestions) -> Self {
+    pub fn build_from_ep(ep_question: &EpQuQuestions) -> Self {
         let mut qq: QQuestions = Default::default();
         if ep_question.question_id == 0 {
             qq.question_id = None;

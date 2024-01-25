@@ -2,7 +2,8 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
-use codeduel_backend::api_models::{EpInQuestions, EpOutQuestions};
+use codeduel_backend::api_models::EpInQuestions;
+use codeduel_backend::api_models::EpQuQuestions;
 // use codeduel_backend::api_models::*;
 use codeduel_backend::db_models::*;
 // use codeduel_backend::wallet_lib::*;
@@ -25,7 +26,7 @@ fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
 
 #[post("/get_question", data = "<queryable_question>")]
 fn get_question_ep(
-    queryable_question: Form<EpInQuestions>,
+    queryable_question: Form<EpQuQuestions>,
 ) -> Json<Result<Vec<Questions>, String>> {
     let mut conn = establish_connection();
 
@@ -46,6 +47,15 @@ fn add_user_ep(insertable_user: Form<IUsers>) -> Json<Result<Users, String>> {
     }
 }
 
+#[post("/add_question", data = "<insertable_question>")]
+fn add_question_ep(insertable_question: Form<IUsers>) -> Json<Result<Users, String>> {
+    let mut conn = establish_connection();
+
+    match add_new_user(&mut conn, &insertable_question) {
+        Ok(res) => return Json(Ok(res)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
 #[catch(404)]
 fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
@@ -54,7 +64,10 @@ fn not_found(req: &Request) -> String {
 fn main() {
     rocket::ignite()
         .register(catchers![not_found])
-        .mount("/api", routes![get_user_ep, get_question_ep, add_user_ep])
+        .mount(
+            "/api",
+            routes![get_user_ep, get_question_ep, add_user_ep, add_question_ep],
+        )
         // .attach(DbConn::fairing())
         .launch();
 }
