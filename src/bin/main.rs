@@ -13,7 +13,7 @@ use rocket::*;
 use rocket_contrib::json::Json;
 // use solana_sdk::signature::Signature;
 
-// ------------- get endpoints ----------
+// ------------- get endpoints ---------- //
 #[get("/get_user/<username_or_id>")]
 fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
     let mut conn = establish_connection();
@@ -34,6 +34,18 @@ fn get_question_ep(
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
+
+// ------------- post endpoints ---------- //
+#[post("/add_user", data = "<insertable_user>")]
+fn add_user_ep(insertable_user: Form<IUsers>) -> Json<Result<Users, String>> {
+    let mut conn = establish_connection();
+
+    match add_new_user(&mut conn, &insertable_user) {
+        Ok(res) => return Json(Ok(res)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
 #[catch(404)]
 fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
@@ -42,7 +54,7 @@ fn not_found(req: &Request) -> String {
 fn main() {
     rocket::ignite()
         .register(catchers![not_found])
-        .mount("/api", routes![get_user_ep, get_question_ep])
+        .mount("/api", routes![get_user_ep, get_question_ep, add_user_ep])
         // .attach(DbConn::fairing())
         .launch();
 }

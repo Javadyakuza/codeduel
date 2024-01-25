@@ -119,7 +119,7 @@ pub struct ITestCases {
     pub test_outputs: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
+#[derive(FromForm, Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IUsers {

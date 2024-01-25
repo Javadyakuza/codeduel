@@ -295,7 +295,7 @@ pub fn get_question(
                 .select(Questions::as_select())
                 .load(_conn)
                 .unwrap_or(vec![]);
-            
+
             if tmp_questions.len() == 0 {
                 // response doesn't exists
                 Err(Box::new(std::io::Error::new(
