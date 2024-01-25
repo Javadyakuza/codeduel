@@ -2,6 +2,7 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
+use std::borrow::Borrow;
 use std::ops::Deref;
 
 use codeduel_backend::api_models::EpInQuestions;
@@ -57,19 +58,23 @@ fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Ques
         test_inputs: insertable_question.test_inputs.clone(),
         test_outputs: insertable_question.test_inputs.clone(),
     };
-    let insertable_query_struct: IQuestions = IQuestions {
-        rival_id: insertable_question.rival_id,
-        question_title: insertable_question.question_title.clone(),
-        question_body: insertable_question.question_body.clone(),
-        deadline: *insertable_question.deadline.deref(),
-        question_status: insertable_question.question_status,
-        daredevil: insertable_question.daredevil,
-        category: insertable_question.category.clone(),
-        reward: insertable_question.reward,
-        entrance_fee: insertable_question.entrance_fee,
-    };
+    let insertable_query_struct: IQuestions;
+    match IQuestions::from_ep_in_question(insertable_question.clone()) {
+        Ok(q) => insertable_query_struct = q,
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
     match add_new_question(&mut conn, &insertable_query_struct, &mut tcs) {
         Ok(res) => return Json(Ok(res.0)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+#[post("/add_user_wallet", data = "<insertable_user_wallet>")]
+fn add_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
@@ -84,7 +89,13 @@ fn main() {
         .register(catchers![not_found])
         .mount(
             "/api",
-            routes![get_user_ep, get_question_ep, add_user_ep, add_question_ep],
+            routes![
+                get_user_ep,
+                get_question_ep,
+                add_user_ep,
+                add_question_ep,
+                add_user_wallet_ep
+            ],
         )
         // .attach(DbConn::fairing())
         .launch();

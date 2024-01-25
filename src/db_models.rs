@@ -1,11 +1,11 @@
-use std::{ops::Deref, str::FromStr};
+// use std::{ops::Deref, str::FromStr};
 
 use diesel::prelude::*;
 // use merge_derivable;
-use crate::api_models::{EpInQuestions, EpQuQuestions, NaiveDateForm};
+use crate::api_models::{EpInQuestions, EpQuQuestions};
 use chrono::NaiveDateTime;
 use rocket::FromForm;
-use rocket::{http::RawStr, request::FromFormValue};
+// use rocket::{http::RawStr, request::FromFormValue};
 use serde::{Deserialize, Serialize};
 
 pub const OPEN_UNSOLVED: i32 = 1;
@@ -15,7 +15,7 @@ pub const CLOSED_SOLVED: i32 = 1;
 
 // ------------------------------- general models ----------------------------
 // the following models will represent the actual schema of the tables in terms of the rust structs.
-#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
+#[derive(FromForm, Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
 #[diesel(table_name = crate::schema::wallets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Wallets {
@@ -109,18 +109,28 @@ pub struct IQuestions {
     pub entrance_fee: f32,
 }
 impl IQuestions {
-    pub fn from_ep_in_question(ep_q: EpInQuestions) -> Self {
-        Self {
+    pub fn from_ep_in_question(ep_q: EpInQuestions) -> Result<Self, Box<dyn std::error::Error>> {
+        let _deadline: NaiveDateTime;
+        match NaiveDateTime::parse_from_str(ep_q.deadline.as_str(), "%Y-%m-%d %H:%M:%S") {
+            Ok(d) => _deadline = d,
+            Err(e) => {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "question not found !",
+                )))
+            }
+        }
+        Ok(Self {
             rival_id: ep_q.rival_id,
             question_title: ep_q.question_title,
             question_body: ep_q.question_body,
-            deadline: *ep_q.deadline.deref(),
+            deadline: _deadline,
             question_status: ep_q.question_status,
             daredevil: ep_q.daredevil,
             category: ep_q.category,
             reward: ep_q.reward,
             entrance_fee: ep_q.entrance_fee,
-        }
+        })
     }
 }
 #[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
