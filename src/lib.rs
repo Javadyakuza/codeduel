@@ -77,7 +77,7 @@ pub fn add_user_wallet(
 pub fn add_new_question(
     conn: &mut PgConnection,
     _new_question: &IQuestions,
-    _test_cases: &ITestCases,
+    _test_cases: &mut ITestCases,
 ) -> Result<(Questions, TestCases), Box<dyn std::error::Error>> {
     // inserting the new user
     match diesel::insert_into(questions::table)
@@ -86,8 +86,9 @@ pub fn add_new_question(
         .get_result(conn)
     {
         Ok(nq) => {
+            _test_cases.question_id = nq.question_id;
             match diesel::insert_into(test_cases::table)
-                .values(_test_cases)
+                .values(_test_cases.to_owned())
                 .returning(TestCases::as_returning())
                 .get_result(conn)
             {

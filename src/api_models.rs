@@ -29,6 +29,8 @@ pub struct EpInQuestions {
     pub category: String,
     pub reward: i32,
     pub entrance_fee: i32,
+    pub test_inputs: String,
+    pub test_outputs: String,
 }
 use crate::api_models::request::FromFormValue;
 
