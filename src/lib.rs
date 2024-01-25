@@ -286,7 +286,9 @@ pub fn get_question(
             supported formats: \n
             1 - Some(question_id), None(question_title), None(rival_id), None(question_category) \n
             2 - None(question_id), Some(question_title), Some(rival_id), None(question_category) \n 
-            3 - None(question_id), None(question_title), None(rival_id), Some(question_category)",
+            2 - None(question_id), None(question_title), Some(rival_id), None(question_category) \n 
+            3 - None(question_id), None(question_title), None(rival_id), Some(question_category) \n            
+            ",
         )));
     } else {
         if _mod == 1 {
@@ -343,6 +345,10 @@ pub fn get_question(
             }
         } else {
             // searching by the category
+            print!(
+                "{}",
+                Categories::to_string(_query_struct.question_category.as_ref())
+            );
             let tmp_questions: Vec<Questions> = questions
                 .filter(questions::category.eq(Categories::to_string(
                     _query_struct.question_category.as_ref(),
@@ -354,7 +360,7 @@ pub fn get_question(
                 // question doesn't exists
                 Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
-                    "question not found !",
+                    "question not found by category !",
                 )))
             } else {
                 Ok(tmp_questions.to_owned())

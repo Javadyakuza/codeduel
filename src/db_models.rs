@@ -187,7 +187,7 @@ impl QResponses {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub enum Categories {
     All,
     SolanaPrograms,
@@ -198,9 +198,9 @@ impl Categories {
     pub fn to_string(category: Option<&Self>) -> String {
         match category {
             Some(cat) => match cat {
-                Self::All => "All".to_string(),
-                Self::Rust => "Rust".to_string(),
-                Self::SolanaPrograms => "SolanaPrograms".to_string(),
+                Self::All => "all".to_string(),
+                Self::Rust => "rust".to_string(),
+                Self::SolanaPrograms => "solanaprograms".to_string(),
             },
             _ => "All".to_string(),
         }
@@ -215,7 +215,7 @@ impl Categories {
         }
     }
 }
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Debug)]
 pub struct QQuestions {
     pub question_id: Option<i32>,
     pub question_title: Option<String>, // the queryable title does not have any fixed length.
@@ -231,18 +231,18 @@ impl QQuestions {
     pub fn is_correct_structures(instance: &QQuestions) -> i32 {
         match (
             instance.question_id.is_some(),
-            !instance.question_title.is_some(),
-            !instance.rival_id.is_some(),
-            !instance.question_category.is_some(),
+            instance.question_title.is_some(),
+            instance.rival_id.is_some(),
+            instance.question_category.is_some(),
         ) {
             // Case 1: All fields are present
-            (true, false, false, false) => 1,
+            (true, false, false, true) => 1,
 
             // Case 2: Question ID, Rival ID, and Question Category are present
-            (false, true, true, false) => 2,
+            (false, true, true, true) => 2,
 
             // Case 3: Question Title, Rival ID, and Question Category are present
-            (false, false, true, false) => 3,
+            (false, false, true, true) => 3,
 
             // Case 4: Question Title and Rival ID are present
             (false, false, false, true) => 4,
@@ -283,6 +283,7 @@ impl QQuestions {
                 ep_question.question_category.as_str(),
             ));
         }
+        println!("{:?}", qq);
         Self {
             question_id: qq.question_id,
             question_title: qq.question_title,
