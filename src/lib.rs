@@ -19,6 +19,7 @@ use schema::{
     questions::dsl::*, responses::dsl::*, test_cases::dsl::*, users::dsl::*, wallets::dsl::*,
 };
 
+use std::arch::x86_64::_mm256_bsrli_epi128;
 pub use std::env;
 
 pub fn establish_connection() -> PgConnection {
@@ -79,6 +80,25 @@ pub fn add_new_question(
     _new_question: &IQuestions,
     _test_cases: &mut ITestCases,
 ) -> Result<(Questions, TestCases), Box<dyn std::error::Error>> {
+    // checking if the user has initiated his wallet
+
+    match get_user(conn, format!("{}", _new_question.rival_id).as_str()) {
+        Ok(u) => {
+            if let Err(e) = get_user_wallet(conn, u.user_id) {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    format!("Connect the wallet to proceed {:?}", e),
+                )));
+            }
+        }
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
+
     // inserting the new user
     match diesel::insert_into(questions::table)
         .values(_new_question)
@@ -363,6 +383,25 @@ pub fn get_test_cases(
     }
 }
 
+pub fn get_user_wallet(
+    _conn: &mut PgConnection,
+    _user_id: i32,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let tmp_questions_tcs: Vec<Wallets> = wallets
+        .filter(wallets::user_id.eq(_user_id)) // panic impossible
+        .select(Wallets::as_select())
+        .load(_conn)
+        .unwrap_or(vec![]);
+    if tmp_questions_tcs.len() == 0 {
+        // question doesn't exists
+        Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "address not found !",
+        )))
+    } else {
+        Ok(tmp_questions_tcs[0].sol_addr.to_owned())
+    }
+}
 // // general ** updaters
 pub fn update_user(
     _conn: &mut PgConnection,

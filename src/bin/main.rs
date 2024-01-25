@@ -73,6 +73,7 @@ fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Ques
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
+
 #[catch(404)]
 fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
