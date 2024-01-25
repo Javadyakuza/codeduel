@@ -18,7 +18,7 @@ CREATE TABLE questions (
     daredevil INTEGER DEFAULT NULL,
     reward INTEGER NOT NULL,
     prize_pool INTEGER NOT NULL DEFAULT 0,
-    entrance_fee INTEGER NOT NULL, 
+    entrance_fee FLOAT4 NOT NULL, 
     category VARCHAR(64) NOT NULL
 );
 CREATE TABLE responses (

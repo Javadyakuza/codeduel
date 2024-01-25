@@ -28,7 +28,7 @@ pub struct EpInQuestions {
     pub daredevil: Option<i32>,
     pub category: String,
     pub reward: i32,
-    pub entrance_fee: i32,
+    pub entrance_fee: f32,
     pub test_inputs: String,
     pub test_outputs: String,
 }

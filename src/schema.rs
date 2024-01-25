@@ -13,7 +13,7 @@ diesel::table! {
         daredevil -> Nullable<Int4>,
         reward -> Int4,
         prize_pool -> Int4,
-        entrance_fee -> Int4,
+        entrance_fee -> Float4,
         #[max_length = 64]
         category -> Varchar,
     }

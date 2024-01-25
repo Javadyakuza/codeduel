@@ -49,7 +49,7 @@ pub struct Questions {
     pub daredevil: Option<i32>,
     pub reward: i32,
     pub prize_pool: i32,
-    pub entrance_fee: i32,
+    pub entrance_fee: f32,
     pub category: String,
 }
 
@@ -106,7 +106,7 @@ pub struct IQuestions {
     pub daredevil: Option<i32>,
     pub category: String,
     pub reward: i32,
-    pub entrance_fee: i32,
+    pub entrance_fee: f32,
 }
 impl IQuestions {
     pub fn from_ep_in_question(ep_q: EpInQuestions) -> Self {
@@ -197,9 +197,9 @@ impl Categories {
     }
     pub fn from_string(category: &str) -> Categories {
         match category {
-            "All" => Self::All,
-            "Rust" => Self::Rust,
-            "SolanaPrograms" => Self::SolanaPrograms,
+            "All" | "all" => Self::All,
+            "Rust" | "rust" => Self::Rust,
+            "SolanaPrograms" | "solanaprograms" => Self::SolanaPrograms,
 
             _ => Self::All,
         }
