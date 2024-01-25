@@ -13,7 +13,7 @@ path = "src/bin/main.rs"
 
 
 [dependencies]
-chrono = "0.4.31"
+chrono = { version = "0.4.31", features = ["serde", "rustc-serialize"] }
 diesel = { version = "2.1.1", features = ["postgres", "chrono"] }
 dotenvy = "0.15.7"
 rocket = "0.4.5"

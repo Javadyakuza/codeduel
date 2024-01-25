@@ -35,8 +35,7 @@ pub struct Responses {
     pub creation_time: NaiveDateTime,
 }
 
-
-#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Questions {

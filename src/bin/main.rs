@@ -13,7 +13,7 @@ use rocket::*;
 use rocket_contrib::json::Json;
 // use solana_sdk::signature::Signature;
 
-// ------------- get gateways ----------
+// ------------- get endpoints ----------
 #[get("/get_user/<username_or_id>")]
 fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
     let mut conn = establish_connection();
@@ -26,23 +26,23 @@ fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
 #[post("/get_question", data = "<queryable_question>")]
 fn get_question_ep(
     queryable_question: Form<EpInQuestions>,
-) -> Json<Result<Vec<EpOutQuestions>, String>> {
+) -> Json<Result<Vec<Questions>, String>> {
     let mut conn = establish_connection();
 
     match get_question(&mut conn, &QQuestions::build_from_ep(&*queryable_question)) {
-        Ok(res) => return Json(Ok(EpOutQuestions::from_questions(res))),
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
 #[catch(404)]
 fn not_found(req: &Request) -> String {
-    format!("Oh no , we don't know where is {} url ", req.uri())
+    format!("Oh no, we don't know where is {} ", req.uri())
 }
 
 fn main() {
     rocket::ignite()
         .register(catchers![not_found])
-        .mount("/api", routes![get_user_ep])
+        .mount("/api", routes![get_user_ep, get_question_ep])
         // .attach(DbConn::fairing())
         .launch();
 }
