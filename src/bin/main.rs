@@ -121,12 +121,12 @@ fn update_user_wallet_ep(updatable_user_wallet: Form<UWallets>) -> Json<Result<W
     }
 }
 
-#[put("/update_question", data = "<insertable_user_wallet>")]
-fn update_question_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+#[put("/update_question", data = "<updatable_question>")]
+fn update_question_ep(updatable_question: Form<UQuestion>) -> Json<Result<Questions, String>> {
     let mut conn = establish_connection();
 
-    match add_user_wallet(&mut conn, &insertable_user_wallet) {
-        Ok(res) => return Json(Ok(res.sol_addr)),
+    match update_question(&mut conn, &updatable_question) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }

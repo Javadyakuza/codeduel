@@ -312,19 +312,20 @@ pub struct UUser {
 }
 
 // @notice "fetched from fe" means the same old values will be fetched and sent to backend by the front end application
-pub struct UQuestion<'a> {
-    pub editor: &'a str,
-    pub rival_id: &'a str,
-    pub old_question_title: &'a str, // fetched from fe
-    pub question_title: &'a str,     // fetched from fe
-    pub question_body: &'a str,      // fetched from fe
-    pub deadline: &'a str,           // checked in the backend
-    pub question_status: i32,        // fetched from fe
-    pub daredevil: i32,              // fetched from fe, zero is considered as no daredevil
-    pub prize_pool: i32,             // fetched from fe
-    pub category: &'a str,           // fetched from fe
-    pub test_inputs: &'a str,        // if empty will not be updated
-    pub test_outputs: &'a str,       // if empty will not be updated
+#[derive(FromForm, Debug)]
+pub struct UQuestion {
+    pub editor: String,
+    pub rival_id: String,
+    pub old_question_title: String, // fetched from fe
+    pub question_title: String,     // fetched from fe
+    pub question_body: String,      // fetched from fe
+    pub deadline: String,           // checked in the backend
+    pub question_status: i32,       // fetched from fe
+    pub daredevil: i32,             // fetched from fe, zero is considered as no daredevil
+    pub prize_pool: i32,            // fetched from fe
+    pub category: String,           // fetched from fe
+    pub test_inputs: String,        // if empty will not be updated
+    pub test_outputs: String,       // if empty will not be updated
 }
 
 #[derive(FromForm, Debug)]

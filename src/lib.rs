@@ -459,8 +459,8 @@ pub fn update_question(
     let user_old_info: Users;
     match check_authority(
         _conn,
-        _new_question_info.editor,
-        _new_question_info.rival_id,
+        _new_question_info.editor.as_str(),
+        _new_question_info.rival_id.as_str(),
     ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
@@ -540,6 +540,9 @@ pub fn update_question(
             )))
         }
     }
+
+    // todo!("checking if the new test cases matches with the old sample code or the provided new one");
+
     // updating the questions table
     match diesel::update(questions.filter(questions::question_id.eq(_question[0].question_id)))
         .set((
