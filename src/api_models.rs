@@ -32,28 +32,3 @@ pub struct EpInQuestions {
     pub test_inputs: String,
     pub test_outputs: String,
 }
-
-use crate::api_models::request::FromFormValue;
-
-// #[derive(Debug, Serialize)]
-// pub struct NaiveDateForm(NaiveDateTime);
-// impl<'v> FromFormValue<'v> for NaiveDateForm {
-//     type Error = &'v RawStr;
-
-//     fn from_form_value(form_value: &'v RawStr) -> Result<NaiveDateForm, &'v RawStr> {
-//         match NaiveDateTime::from_str(&form_value) {
-//             Ok(ndt) => Ok(NaiveDateForm(ndt)),
-//             Err(_) => Err(RawStr::from_str(
-//                 "couldn't parse the deadline date and time from the string",
-//             )),
-//         }
-//         // here, parse NaiveDate and return an instance of the wrapper
-//     }
-// }
-// impl Deref for NaiveDateForm {
-//     type Target = NaiveDateTime;
-
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }

@@ -80,6 +80,16 @@ fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Ques
     }
 }
 
+#[post("/add_response", data = "<insertable_response>")]
+fn add_response_ep(insertable_response: Form<IResponses>) -> Json<Result<Responses, String>> {
+    let mut conn = establish_connection();
+
+    match add_response(&mut conn, &insertable_response) {
+        Ok(res) => return Json(Ok(res)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
 #[post("/add_user_wallet", data = "<insertable_user_wallet>")]
 fn add_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
     let mut conn = establish_connection();
@@ -105,6 +115,7 @@ fn main() {
                 get_question_ep,
                 add_user_ep,
                 add_question_ep,
+                add_response_ep,
                 add_user_wallet_ep
             ],
         )

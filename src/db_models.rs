@@ -23,7 +23,7 @@ pub struct Wallets {
     pub sol_addr: String,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone, Iterable)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Iterable, Serialize)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Responses {
@@ -81,7 +81,7 @@ pub struct Users {
 // ------------------------------- insertable models ----------------------------
 // the following models are not containing the primary key fields, making able the fns to insert the values without the pks.
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone, Iterable)]
+#[derive(FromForm, Queryable, Selectable, Debug, Insertable, Clone, Iterable)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IResponses {
@@ -90,7 +90,7 @@ pub struct IResponses {
     pub question_id: i32,
     pub response_code: String,
     pub correctness: bool,
-    pub creation_time: NaiveDateTime,
+    // pub creation_time: NaiveDateTime, calculated by the db
 }
 
 #[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize, Iterable)]
