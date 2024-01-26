@@ -337,6 +337,8 @@ pub struct UWallets {
 
 // ---------------------------------------------------------- removable models ---------------------------------------------------------
 // the following models will provide the simple editor user id and certain unique single input for removing the values from the database
+#[derive(FromForm, Debug)]
+
 pub struct RUsers<'a> {
     pub remover: &'a str,
     pub username_or_id: &'a str,

@@ -132,12 +132,12 @@ fn update_question_ep(updatable_question: Form<UQuestion>) -> Json<Result<Questi
 }
 
 // ------------- update endpoints ---------- //
-#[delete("/delete_user", data = "<insertable_user_wallet>")]
-fn delete_user_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+#[delete("/delete_user", data = "<removable_user>")]
+fn delete_user_ep(removable_user: Form<RUsers>) -> Json<Result<bool, String>> {
     let mut conn = establish_connection();
 
-    match add_user_wallet(&mut conn, &insertable_user_wallet) {
-        Ok(res) => return Json(Ok(res.sol_addr)),
+    match delete_user(&mut conn, &removable_user) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
@@ -172,8 +172,8 @@ fn main() {
                 update_user_ep,
                 update_user_wallet_ep,
                 update_question_ep,
-                delete_question_ep,
                 delete_user_ep,
+                delete_question_ep,
             ],
         )
         // .attach(DbConn::fairing())
