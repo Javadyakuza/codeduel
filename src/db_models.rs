@@ -115,7 +115,7 @@ impl IQuestions {
         let _deadline: NaiveDateTime;
         match NaiveDateTime::parse_from_str(ep_q.deadline.as_str(), "%Y-%m-%d %H:%M:%S") {
             Ok(d) => _deadline = d,
-            Err(e) => {
+            Err(_) => {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
                     "question not found !",
@@ -173,8 +173,8 @@ impl QResponses {
     pub fn is_correct_structures(instance: &QResponses) -> i32 {
         match (
             instance.question_id.is_some(),
-            !instance.response_id.is_some(),
-            !instance.daredevil_id.is_some(),
+            instance.response_id.is_some(),
+            instance.daredevil_id.is_some(),
         ) {
             // Case 1: All fields are present
             (true, false, false) => 1,

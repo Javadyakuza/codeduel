@@ -2,14 +2,9 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
-use std::borrow::Borrow;
-use std::ops::Deref;
-
 use codeduel_backend::api_models::EpInQuestions;
 use codeduel_backend::api_models::EpQuQuestions;
-// use codeduel_backend::api_models::*;
 use codeduel_backend::db_models::*;
-// use codeduel_backend::wallet_lib::*;
 use codeduel_backend::*;
 use rocket::request::Form;
 use rocket::request::Request;
