@@ -339,13 +339,15 @@ pub struct UWallets {
 // the following models will provide the simple editor user id and certain unique single input for removing the values from the database
 #[derive(FromForm, Debug)]
 
-pub struct RUsers<'a> {
-    pub remover: &'a str,
-    pub username_or_id: &'a str,
+pub struct RUsers {
+    pub remover: String,
+    pub username_or_id: String,
 }
 
-pub struct RQuestions<'a> {
-    pub remover: &'a str,
-    pub rival_id: &'a str,
-    pub question_title: &'a str, // fetched from fe
+#[derive(FromForm, Debug)]
+
+pub struct RQuestions {
+    pub remover: String,
+    pub rival_id: String,
+    pub question_title: String, // fetched from fe
 }

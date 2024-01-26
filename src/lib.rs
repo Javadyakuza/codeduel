@@ -631,7 +631,11 @@ pub fn delete_user(
 ) -> Result<bool, Box<dyn std::error::Error>> {
     // checking the authority of the remover
     let user_old_info: Users;
-    match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
+    match check_authority(
+        _conn,
+        _user_info.remover.as_str(),
+        _user_info.username_or_id.as_str(),
+    ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
@@ -704,7 +708,11 @@ fn delete_user_wallet(
 ) -> Result<bool, Box<dyn std::error::Error>> {
     // checking the authority of the remover
     let user_old_info: Users;
-    match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
+    match check_authority(
+        _conn,
+        _user_info.remover.as_str(),
+        _user_info.username_or_id.as_str(),
+    ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
@@ -732,7 +740,11 @@ pub fn delete_question(
 ) -> Result<bool, Box<dyn std::error::Error>> {
     // checking the authority of the remover
     let user_old_info: Users;
-    match check_authority(_conn, _question_info.remover, _question_info.rival_id) {
+    match check_authority(
+        _conn,
+        _question_info.remover.as_str(),
+        _question_info.rival_id.as_str(),
+    ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
             return Err(Box::new(std::io::Error::new(

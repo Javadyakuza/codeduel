@@ -142,12 +142,12 @@ fn delete_user_ep(removable_user: Form<RUsers>) -> Json<Result<bool, String>> {
     }
 }
 
-#[delete("/delete_question", data = "<insertable_user_wallet>")]
-fn delete_question_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+#[delete("/delete_question", data = "<removable_question>")]
+fn delete_question_ep(removable_question: Form<RQuestions>) -> Json<Result<bool, String>> {
     let mut conn = establish_connection();
 
-    match add_user_wallet(&mut conn, &insertable_user_wallet) {
-        Ok(res) => return Json(Ok(res.sol_addr)),
+    match delete_question(&mut conn, &removable_question) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
