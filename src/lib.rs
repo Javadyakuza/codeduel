@@ -24,7 +24,6 @@ use std::collections::HashMap;
 pub use std::env;
 use std::iter::Enumerate;
 use std::ops::Deref;
-mod macros;
 pub fn establish_connection() -> PgConnection {
     // loading the env vars into the current scope
     dotenv().ok();

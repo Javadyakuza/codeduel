@@ -11,7 +11,6 @@ use codeduel_backend::api_models::EpQuQuestions;
 use codeduel_backend::db_models::*;
 // use codeduel_backend::wallet_lib::*;
 use codeduel_backend::*;
-use crate::vec;
 use rocket::request::Form;
 use rocket::request::Request;
 use rocket::*;
@@ -28,13 +27,24 @@ fn get_user_ep(username_or_id: String) -> Json<Result<Users, String>> {
     }
 }
 
-#[post("/get_question", data = "<queryable_question>")]
+#[get("/get_question/<_question_id>/<_question_title>/<_rival_id>/<_question_category>")]
 fn get_question_ep(
-    queryable_question: Form<EpQuQuestions>,
+    _question_id: i32,
+    _question_title: String,
+    _rival_id: i32,
+    _question_category: String,
 ) -> Json<Result<Vec<Questions>, String>> {
     let mut conn = establish_connection();
 
-    match get_question(&mut conn, &QQuestions::build_from_ep(&*queryable_question)) {
+    match get_question(
+        &mut conn,
+        &QQuestions::build_from_ep(&EpQuQuestions {
+            question_id: _question_id,
+            question_title: _question_title,
+            rival_id: _rival_id,
+            question_category: _question_category,
+        }),
+    ) {
         Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
