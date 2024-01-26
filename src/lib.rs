@@ -419,8 +419,8 @@ pub fn update_user(
     let user_old_info: Users;
     match check_authority(
         _conn,
-        _new_user_info.editor,
-        _new_user_info.old_username_or_id,
+        _new_user_info.editor.as_str(),
+        _new_user_info.old_username_or_id.as_str(),
     ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
@@ -590,8 +590,8 @@ pub fn update_user_wallet(
     let user_old_info: Users;
     match check_authority(
         _conn,
-        _new_user_wallet_info.editor,
-        _new_user_wallet_info.username_or_id,
+        _new_user_wallet_info.editor.as_str(),
+        _new_user_wallet_info.username_or_id.as_str(),
     ) {
         Ok(ui) => user_old_info = ui,
         Err(e) => {
@@ -675,14 +675,14 @@ pub fn delete_user(
     match update_user(
         _conn,
         &UUser {
-            old_username_or_id: user_old_info.username.as_str(),
-            new_email: "deleted",
-            new_password: "deleted",
-            new_username: "deleted",
+            old_username_or_id: user_old_info.username.clone(),
+            new_email: "deleted".to_string(),
+            new_password: "deleted".to_string(),
+            new_username: "deleted".to_string(),
             new_total_payed: user_old_info.total_payed, // same as before
             new_total_claimed: user_old_info.total_claimed, // same as before
             new_total_unclaimed: user_old_info.total_unclaimed, // same as before
-            editor: user_old_info.username.as_str(),
+            editor: user_old_info.username,
         },
     ) {
         Ok(_) => Ok(true),
@@ -695,33 +695,33 @@ pub fn delete_user(
     }
 }
 
-// pub fn delete_user_wallet(
-//     _conn: &mut PgConnection,
-//     _user_info: &RUsers,
-// ) -> Result<bool, Box<dyn std::error::Error>> {
-//     // checking the authority of the remover
-//     let user_old_info: Users;
-//     match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
-//         Ok(ui) => user_old_info = ui,
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::Other,
-//                 format!("{:?}", e),
-//             )))
-//         }
-//     }
+fn delete_user_wallet(
+    _conn: &mut PgConnection,
+    _user_info: &RUsers,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    // checking the authority of the remover
+    let user_old_info: Users;
+    match check_authority(_conn, _user_info.remover, _user_info.username_or_id) {
+        Ok(ui) => user_old_info = ui,
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
 
-//     match diesel::delete(wallets.filter(wallets::user_id.eq(user_old_info.user_id))).execute(_conn)
-//     {
-//         Ok(_) => Ok(true),
-//         Err(e) => {
-//             return Err(Box::new(std::io::Error::new(
-//                 std::io::ErrorKind::Other,
-//                 format!("couldn't delete the user wallet \n {:?}", e),
-//             )))
-//         }
-//     }
-// }
+    match diesel::delete(wallets.filter(wallets::user_id.eq(user_old_info.user_id))).execute(_conn)
+    {
+        Ok(_) => Ok(true),
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("couldn't delete the user wallet \n {:?}", e),
+            )))
+        }
+    }
+}
 
 pub fn delete_question(
     _conn: &mut PgConnection,

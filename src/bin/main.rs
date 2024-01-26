@@ -102,21 +102,21 @@ fn add_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<Stri
 
 // ------------- update endpoints ---------- //
 
-#[put("/update_user", data = "<insertable_user_wallet>")]
-fn update_user_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+#[put("/update_user", data = "<updatable_user>")]
+fn update_user_ep(updatable_user: Form<UUser>) -> Json<Result<Users, String>> {
     let mut conn = establish_connection();
 
-    match add_user_wallet(&mut conn, &insertable_user_wallet) {
-        Ok(res) => return Json(Ok(res.sol_addr)),
+    match update_user(&mut conn, &updatable_user) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
-#[put("/update_user_wallet", data = "<insertable_user_wallet>")]
-fn update_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+#[put("/update_user_wallet", data = "<updatable_user_wallet>")]
+fn update_user_wallet_ep(updatable_user_wallet: Form<UWallets>) -> Json<Result<Wallets, String>> {
     let mut conn = establish_connection();
 
-    match add_user_wallet(&mut conn, &insertable_user_wallet) {
-        Ok(res) => return Json(Ok(res.sol_addr)),
+    match update_user_wallet(&mut conn, &updatable_user_wallet) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }

@@ -299,15 +299,16 @@ impl QQuestions {
 
 // ------------------------------- updatable models ----------------------------
 // the following models will provide the dynamic inputs for the getter functions
-pub struct UUser<'a> {
-    pub old_username_or_id: &'a str,
-    pub new_email: &'a str,
-    pub new_password: &'a str,
-    pub new_username: &'a str,
+#[derive(FromForm, Debug)]
+pub struct UUser {
+    pub old_username_or_id: String,
+    pub new_email: String,
+    pub new_password: String,
+    pub new_username: String,
     pub new_total_payed: i32,
     pub new_total_claimed: i32,
     pub new_total_unclaimed: i32,
-    pub editor: &'a str,
+    pub editor: String,
 }
 
 // @notice "fetched from fe" means the same old values will be fetched and sent to backend by the front end application
@@ -326,10 +327,11 @@ pub struct UQuestion<'a> {
     pub test_outputs: &'a str,       // if empty will not be updated
 }
 
-pub struct UWallets<'a> {
-    pub editor: &'a str,
-    pub username_or_id: &'a str,
-    pub new_sol_addr: &'a str,
+#[derive(FromForm, Debug)]
+pub struct UWallets {
+    pub editor: String,
+    pub username_or_id: String,
+    pub new_sol_addr: String,
 }
 
 // ---------------------------------------------------------- removable models ---------------------------------------------------------
