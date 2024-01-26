@@ -100,6 +100,58 @@ fn add_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<Stri
     }
 }
 
+// ------------- update endpoints ---------- //
+
+#[put("/update_user", data = "<insertable_user_wallet>")]
+fn update_user_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+#[put("/update_user_wallet", data = "<insertable_user_wallet>")]
+fn update_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+#[put("/update_question", data = "<insertable_user_wallet>")]
+fn update_question_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+// ------------- update endpoints ---------- //
+#[delete("/delete_user", data = "<insertable_user_wallet>")]
+fn delete_user_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+#[delete("/delete_question", data = "<insertable_user_wallet>")]
+fn delete_question_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match add_user_wallet(&mut conn, &insertable_user_wallet) {
+        Ok(res) => return Json(Ok(res.sol_addr)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
 #[catch(404)]
 fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
@@ -116,7 +168,12 @@ fn main() {
                 add_user_ep,
                 add_question_ep,
                 add_response_ep,
-                add_user_wallet_ep
+                add_user_wallet_ep,
+                update_user_ep,
+                update_user_wallet_ep,
+                update_question_ep,
+                delete_question_ep,
+                delete_user_ep,
             ],
         )
         // .attach(DbConn::fairing())
