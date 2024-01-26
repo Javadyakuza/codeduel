@@ -11,6 +11,7 @@ use codeduel_backend::api_models::EpQuQuestions;
 use codeduel_backend::db_models::*;
 // use codeduel_backend::wallet_lib::*;
 use codeduel_backend::*;
+use crate::vec;
 use rocket::request::Form;
 use rocket::request::Request;
 use rocket::*;

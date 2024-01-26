@@ -7,7 +7,7 @@ use chrono::NaiveDateTime;
 use rocket::FromForm;
 // use rocket::{http::RawStr, request::FromFormValue};
 use serde::{Deserialize, Serialize};
-
+use struct_iterable::Iterable;
 pub const OPEN_UNSOLVED: i32 = 1;
 pub const OPEN_SOLVED: i32 = 2;
 pub const CLOSED_UNSOLVED: i32 = 1;
@@ -15,7 +15,7 @@ pub const CLOSED_SOLVED: i32 = 1;
 
 // ------------------------------- general models ----------------------------
 // the following models will represent the actual schema of the tables in terms of the rust structs.
-#[derive(FromForm, Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
+#[derive(FromForm, Queryable, Selectable, Debug, Insertable, Clone, Serialize, Iterable)]
 #[diesel(table_name = crate::schema::wallets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Wallets {
@@ -23,7 +23,7 @@ pub struct Wallets {
     pub sol_addr: String,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Iterable)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Responses {
@@ -35,7 +35,7 @@ pub struct Responses {
     pub creation_time: NaiveDateTime,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize, Iterable)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Questions {
@@ -53,7 +53,9 @@ pub struct Questions {
     pub category: String,
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Default)]
+#[derive(
+    Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Default, Iterable,
+)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct TestCases {
@@ -63,7 +65,7 @@ pub struct TestCases {
     pub test_outputs: String, // stringified json
 }
 
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Iterable)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Users {
@@ -79,7 +81,7 @@ pub struct Users {
 // ------------------------------- insertable models ----------------------------
 // the following models are not containing the primary key fields, making able the fns to insert the values without the pks.
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Iterable)]
 #[diesel(table_name = crate::schema::responses)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IResponses {
@@ -91,7 +93,7 @@ pub struct IResponses {
     pub creation_time: NaiveDateTime,
 }
 
-#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize)]
+#[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize, Iterable)]
 #[diesel(table_name = crate::schema::questions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IQuestions {
@@ -133,7 +135,7 @@ impl IQuestions {
         })
     }
 }
-#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Iterable)]
 #[diesel(table_name = crate::schema::test_cases)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct ITestCases {
@@ -143,7 +145,9 @@ pub struct ITestCases {
     pub test_outputs: String,
 }
 
-#[derive(FromForm, Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone)]
+#[derive(
+    FromForm, Queryable, Deserialize, Serialize, Selectable, Debug, Insertable, Clone, Iterable,
+)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct IUsers {
@@ -198,9 +202,9 @@ impl Categories {
     pub fn to_string(category: Option<&Self>) -> String {
         match category {
             Some(cat) => match cat {
-                Self::All => "all".to_string(),
-                Self::Rust => "rust".to_string(),
-                Self::SolanaPrograms => "solanaprograms".to_string(),
+                Self::All => "All".to_string(),
+                Self::Rust => "Rust".to_string(),
+                Self::SolanaPrograms => "SolanaPrograms".to_string(),
             },
             _ => "All".to_string(),
         }
@@ -215,7 +219,7 @@ impl Categories {
         }
     }
 }
-#[derive(Default, Serialize, Debug)]
+#[derive(Default, Serialize, Debug, Iterable)]
 pub struct QQuestions {
     pub question_id: Option<i32>,
     pub question_title: Option<String>, // the queryable title does not have any fixed length.
