@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[derive(ErrorCode)]
+#[derive(Error)]
 pub enum ErrorCode {
     // Deposit instruction errors
     InvalidAmount,

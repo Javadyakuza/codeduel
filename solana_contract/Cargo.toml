@@ -1,0 +1,22 @@
+[package]
+name = "smart_contract"
+description = ""
+version = "0.1.0"
+authors = ["codeduel"]
+license = "MIT"
+keywords = ["solana", "program"]
+readme = "README.md"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+borsh = "0.8"
+solana-program = "1.6"
+spl-token = { version = "3.1.0", features = ["no-entrypoint"] }
+thiserror = "1.0.24"
+
+[features]
+no-entrypoint = []
+default = []
