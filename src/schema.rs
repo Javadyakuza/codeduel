@@ -34,6 +34,8 @@ diesel::table! {
     test_cases (test_case_id) {
         test_case_id -> Int4,
         question_id -> Int4,
+        executable_solution -> Text,
+        solution_executer -> Text,
         test_inputs -> Text,
         test_outputs -> Text,
     }

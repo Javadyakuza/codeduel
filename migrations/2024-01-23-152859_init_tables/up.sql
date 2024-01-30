@@ -33,6 +33,8 @@ CREATE TABLE responses (
 CREATE TABLE test_cases (
     test_case_id SERIAL PRIMARY KEY NOT NULL,
     question_id INTEGER NOT NULL REFERENCES questions(question_id),
+    executable_solution TEXT NOT NULL,
+    solution_executer TEXT NOT NULL, 
     test_inputs TEXT NOT NULL,
     test_outputs TEXT NOT NULL
 );

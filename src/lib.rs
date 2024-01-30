@@ -380,7 +380,7 @@ pub fn get_test_cases(
         // question doesn't exists
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            "question not found !",
+            "test cases not found !",
         )))
     } else {
         Ok(tmp_questions_tcs[0].to_owned())

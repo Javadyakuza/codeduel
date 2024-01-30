@@ -61,6 +61,8 @@ pub struct Questions {
 pub struct TestCases {
     pub test_case_id: i32,
     pub question_id: i32,
+    pub executable_solution: String,
+    pub solution_executer: String,
     pub test_inputs: String,  // stringified json
     pub test_outputs: String, // stringified json
 }
@@ -141,6 +143,8 @@ impl IQuestions {
 pub struct ITestCases {
     // pub test_case_id: i32, // pk
     pub question_id: i32,
+    pub executable_solution: String,
+    pub solution_executer: String,
     pub test_inputs: String,
     pub test_outputs: String,
 }

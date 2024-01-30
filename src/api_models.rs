@@ -22,6 +22,8 @@ pub struct EpInQuestions {
     pub category: String,
     pub reward: i32,
     pub entrance_fee: f32,
+    pub executable_solution: String,
+    pub solution_executer: String,
     pub test_inputs: String,
     pub test_outputs: String,
 }

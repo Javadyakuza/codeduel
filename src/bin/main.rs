@@ -61,6 +61,8 @@ fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Ques
     let mut conn = establish_connection();
     let mut tcs: ITestCases = ITestCases {
         question_id: 0,
+        executable_solution: insertable_question.executable_solution.clone(),
+        solution_executer: insertable_question.solution_executer.clone(),
         test_inputs: insertable_question.test_inputs.clone(),
         test_outputs: insertable_question.test_inputs.clone(),
     };
