@@ -20,8 +20,6 @@ use schema::{
     questions::dsl::*, responses::dsl::*, test_cases::dsl::*, users::dsl::*, wallets::dsl::*,
 };
 pub use std::env;
-use tc_execution_lib::CargoProjectParams;
-use tc_execution_lib::{parse_init_execute, update_toml};
 
 pub fn establish_connection() -> PgConnection {
     // loading the env vars into the current scope

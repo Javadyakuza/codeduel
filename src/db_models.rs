@@ -4,11 +4,7 @@ use diesel::prelude::*;
 // use merge_derivable;
 use crate::api_models::{EpInQuestions, EpQuQuestions};
 use chrono::NaiveDateTime;
-use rocket::{
-    http::Header,
-    response::{self, Responder},
-    FromForm, Request, Response,
-};
+use rocket::FromForm;
 // use rocket::{http::RawStr, request::FromFormValue};
 use serde::{Deserialize, Serialize};
 use struct_iterable::Iterable;
@@ -369,4 +365,3 @@ pub struct RQuestions {
     pub rival_id: String,
     pub question_title: String, // fetched from fe
 }
-

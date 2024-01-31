@@ -80,15 +80,16 @@ async fn add_question_ep(
         executer: tcs.solution_executer.to_owned(),
     };
 
-    match parse_init_execute(temp_runner_params).await {
+    let test_cases_res: String = match parse_init_execute(temp_runner_params).await {
         Ok(res) => {
             println!("this is the res {}", res);
             if !res {
                 return Json(Err("Running test cases failed".to_string()));
             }
+            "true".to_string()
         }
-        Err(e) => return Json(Err(format!("{:?}", e))),
-    }
+        Err(e) => format!("{:?}", e),
+    };
 
     let _ = rocket::tokio::time::sleep(rocket::tokio::time::Duration::from_secs(10)).await;
 
@@ -96,6 +97,11 @@ async fn add_question_ep(
         Ok(_) => {}
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
+
+    if test_cases_res != "true".to_string() {
+        return Json(Err(test_cases_res));
+    }
+
     match add_new_question(&mut conn, &insertable_query_struct, &mut tcs).await {
         Ok(res) => return Json(Ok(res.0)),
         Err(e) => return Json(Err(format!("{:?}", e))),

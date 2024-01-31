@@ -6,7 +6,7 @@ use tokio::io::AsyncSeekExt;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
-const STATIC_TOML: &str = "[package]
+const STATIC_TOML: &str = "                          [package]
 [package]
 name = \"codeduel_backend\"
 version = \"0.1.0\"
@@ -29,6 +29,9 @@ dotenvy = \"0.15.7\"
 rocket = {version = \"0.5.0\", features = [\"json\"]}
 serde = { version = \"1.0.195\", features = [\"derive\"] }
 struct_iterable = \"0.1.1\"                                                                                                                          
+tokio = { version = \"1.18.2\", features = [\"full\"] }                                           
+
+
 
 
 
@@ -265,7 +268,7 @@ pub async fn parse_init_execute(
 
     let _ = match Command::new("sh").arg(&runner_path).output().await {
         Ok(o) => {
-            let tmp_output = String::from_utf8_lossy(&o.stderr).to_string();
+            let tmp_output = String::from_utf8_lossy(&o.stdout).to_string();
             println!("this is the out put {}", tmp_output);
             if tmp_output.contains("false") {
                 return Err(Box::new(std::io::Error::new(
