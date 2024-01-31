@@ -106,9 +106,7 @@ pub async fn parse_init_execute(
 
     // executing the bash script to generate the project
     let _ = match Command::new("sh").arg(&creator_path).output().await {
-        Ok(o) => {
-            println!("creator {:?}", o.stderr);
-        }
+        Ok(_) => {}
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
@@ -220,7 +218,6 @@ pub async fn parse_init_execute(
     {
         Ok(o) => {
             let tmp_output = String::from_utf8_lossy(&o.stderr).to_string();
-            // println!("bin runner {:?}", tmp_output);
             if tmp_output.contains("error") {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::Other,
@@ -268,7 +265,6 @@ pub async fn parse_init_execute(
     let _ = match Command::new("sh").arg(&runner_path).output().await {
         Ok(o) => {
             let tmp_output = String::from_utf8_lossy(&o.stdout).to_string();
-            println!("this is the out put {}", tmp_output);
             if tmp_output.contains("false") {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::Other,

@@ -82,7 +82,6 @@ async fn add_question_ep(
 
     let test_cases_res: String = match parse_init_execute(temp_runner_params).await {
         Ok(res) => {
-            println!("this is the res {}", res);
             if !res {
                 return Json(Err("Running test cases failed".to_string()));
             }
