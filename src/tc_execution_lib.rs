@@ -6,8 +6,7 @@ use tokio::io::AsyncSeekExt;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
-const STATIC_TOML: &str = "                          [package]
-[package]
+const STATIC_TOML: &str = "[package]
 name = \"codeduel_backend\"
 version = \"0.1.0\"
 edition = \"2021\"

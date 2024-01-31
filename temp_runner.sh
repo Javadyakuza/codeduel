@@ -1,1 +1,1 @@
-/home/javadyakuza/rust_projects/codeduel_backend/target/debug/codu_tmp_exeCTU83_81_2
+/home/javadyakuza/rust_projects/codeduel_backend/target/debug/codu_tmp_exeCTU25_72_2
