@@ -1,6 +1,5 @@
-pub mod models;
+pub use crate::api_models::CargoProjectParams;
 use chrono::Utc;
-pub use models::CargoProjectParams;
 use std::env;
 use std::io::SeekFrom;
 use tokio::io::AsyncSeekExt;
@@ -8,22 +7,28 @@ use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
 const STATIC_TOML: &str = "[package]
-name = \"code_executer\"
+[package]
+name = \"codeduel_backend\"
 version = \"0.1.0\"
 edition = \"2021\"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+src = [\"lib.rs\"]
+
+[[bin]]
+name = \"main\"
+path = \"src/bin/main.rs\"
+
 
 [dependencies]
-chrono = \"0.4.33\"
-rocket = \"0.5.0\"
-serde = { version = \"1.0.196\", features = [\"derive\"] }
-tokio = { version = \"1.18.2\", features = [\"full\"] }
-
-[dependencies.rocket_contrib]
-version = \"0.4.5\"
-features = [\"handlebars_templates\", \"tera_templates\"]                                                              
+cargo-watch = \"8.4.1\"
+chrono = { version = \"0.4.31\", features = [\"serde\", \"rustc-serialize\"] }
+diesel = { version = \"2.1.1\", features = [\"postgres\", \"chrono\"] }
+dotenvy = \"0.15.7\"
+rocket = {version = \"0.5.0\", features = [\"json\"]}
+serde = { version = \"1.0.195\", features = [\"derive\"] }
+struct_iterable = \"0.1.1\"                                                                                                                          
 
 
 
@@ -57,9 +62,9 @@ pub async fn parse_init_execute(
 
     // creating the file system options
     let mut options = tokio::fs::File::options();
-    let creator_path = format!("{}/code_executer/temp_creator.sh", pwd.to_str().unwrap());
-    let runner_path = format!("{}/code_executer/temp_runner.sh", pwd.to_str().unwrap());
-    let remover_path = format!("{}/code_executer/temp_remover.sh", pwd.to_str().unwrap());
+    let creator_path = format!("{}/temp_creator.sh", pwd.to_str().unwrap());
+    let runner_path = format!("{}/temp_runner.sh", pwd.to_str().unwrap());
+    let remover_path = format!("{}/temp_remover.sh", pwd.to_str().unwrap());
 
     // writing the temp creator bash file commands
     match options.write(true).read(true).open(&creator_path).await {
@@ -68,11 +73,11 @@ pub async fn parse_init_execute(
                 .write_all(
                     format!(
                         "
-                        cargo new $PWD/code_executer/temp_exe/codu_tmp_exe{} --bin &&
-                        chown -R javadyakuza:javadyakuza $PWD/code_executer/temp_exe/codu_tmp_exe{} &&
-                        touch $PWD/code_executer/temp_exe/codu_tmp_exe{}/src/executable.rs &&
-                        echo \"cargo build --manifest-path $PWD/code_executer/temp_exe/codu_tmp_exe{}/Cargo.toml\" > $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh &&
-                        chmod +x $PWD/code_executer/temp_exe/codu_tmp_exe{}/bin_builder.sh
+                        cargo new $PWD/temp_exe/codu_tmp_exe{} --bin &&
+                        chown -R javadyakuza:javadyakuza $PWD/temp_exe/codu_tmp_exe{} &&
+                        touch $PWD/temp_exe/codu_tmp_exe{}/src/executable.rs &&
+                        echo \"cargo build --manifest-path $PWD/temp_exe/codu_tmp_exe{}/Cargo.toml\" > $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh &&
+                        chmod +x $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh
                         ",
                         rpn, rpn, rpn, rpn, rpn, rpn,
                     )
@@ -100,7 +105,7 @@ pub async fn parse_init_execute(
     // executing the bash script to generate the project
     let _ = match Command::new("sh").arg(&creator_path).output().await {
         Ok(o) => {
-            println!("creator {:?}", o.stdout);
+            println!("creator {:?}", o.stderr);
         }
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
@@ -117,9 +122,9 @@ pub async fn parse_init_execute(
                 .write_all(
                     format!(
                         "
-                        rm -rf code_executer/temp_exe/codu_tmp_exe{} &&
-                        rm -rf code_executer/target/debug/codu_tmp_exe{} &&
-                        rm -rf code_executer/target/debug/codu_tmp_exe{}.d
+                        rm -rf temp_exe/codu_tmp_exe{} &&
+                        rm -rf target/debug/codu_tmp_exe{} &&
+                        rm -rf target/debug/codu_tmp_exe{}.d
                         ",
                         rpn, rpn, rpn,
                     )
@@ -148,7 +153,7 @@ pub async fn parse_init_execute(
         .write(true)
         .read(true)
         .open(format!(
-            "{}/code_executer/temp_exe/codu_tmp_exe{}/src/executable.rs",
+            "{}/temp_exe/codu_tmp_exe{}/src/executable.rs",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -175,7 +180,7 @@ pub async fn parse_init_execute(
         .write(true)
         .read(true)
         .open(format!(
-            "{}/code_executer/temp_exe/codu_tmp_exe{}/src/main.rs",
+            "{}/temp_exe/codu_tmp_exe{}/src/main.rs",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -204,7 +209,7 @@ pub async fn parse_init_execute(
         //     rpn
         // ))
         .arg(format!(
-            "{}/code_executer/temp_exe/codu_tmp_exe{}/bin_builder.sh",
+            "{}/temp_exe/codu_tmp_exe{}/bin_builder.sh",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -212,12 +217,6 @@ pub async fn parse_init_execute(
         .await
     {
         Ok(o) => {
-            // println!(
-            //     "raw {:?} \n stdout {:?} \n to_string {} \n",
-            //     o,
-            //     o.stdout,
-            //     String::from_utf8_lossy(&o.stdout).to_string()
-            // );
             let tmp_output = String::from_utf8_lossy(&o.stderr).to_string();
             // println!("bin runner {:?}", tmp_output);
             if tmp_output.contains("error") {
@@ -242,12 +241,8 @@ pub async fn parse_init_execute(
         Ok(mut file) => {
             match file
                 .write_all(
-                    format!(
-                        "{}/code_executer/target/debug/codu_tmp_exe{}",
-                        pwd.to_str().unwrap(),
-                        rpn
-                    )
-                    .as_bytes(),
+                    format!("{}/target/debug/codu_tmp_exe{}", pwd.to_str().unwrap(), rpn)
+                        .as_bytes(),
                 )
                 .await
             {
@@ -270,7 +265,8 @@ pub async fn parse_init_execute(
 
     let _ = match Command::new("sh").arg(&runner_path).output().await {
         Ok(o) => {
-            let tmp_output = String::from_utf8_lossy(&o.stdout).to_string();
+            let tmp_output = String::from_utf8_lossy(&o.stderr).to_string();
+            println!("this is the out put {}", tmp_output);
             if tmp_output.contains("false") {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::Other,
@@ -295,16 +291,13 @@ pub async fn update_toml() -> Result<bool, Box<dyn std::error::Error>> {
     // creating the file system options and getting the current path
     let mut options = tokio::fs::File::options();
     let pwd = env::current_dir().unwrap(); // panic impossible
-    let remover_path = format!("{}/code_executer/temp_remover.sh", pwd.to_str().unwrap());
+    let remover_path = format!("{}/temp_remover.sh", pwd.to_str().unwrap());
 
     // replacing the cargo.toml file with the static content
     match options
         .read(true)
         .write(true)
-        .open(format!(
-            "{}/code_executer/Cargo.toml",
-            pwd.to_str().unwrap()
-        ))
+        .open(format!("{}/Cargo.toml", pwd.to_str().unwrap()))
         .await
     {
         Ok(mut f) => {

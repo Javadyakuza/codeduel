@@ -2,18 +2,13 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
-use code_executer::parse_init_execute;
-use code_executer::update_toml;
-use code_executer::CargoProjectParams;
-use codeduel_backend::api_models::EpInQuestions;
-use codeduel_backend::api_models::EpQuQuestions;
+use codeduel_backend::api_models::{CargoProjectParams, EpInQuestions, EpQuQuestions};
 use codeduel_backend::db_models::*;
+use codeduel_backend::tc_execution_lib::{parse_init_execute, update_toml};
 use codeduel_backend::*;
 use rocket::form::Form;
-use rocket::http::Status;
 use rocket::request::Request;
-use rocket::response::status;
-use rocket::serde::json::{json, Json, Value};
+use rocket::serde::json::Json;
 use rocket::*;
 // use solana_sdk::signature::Signature;
 
@@ -186,8 +181,8 @@ fn not_found(req: &Request) -> String {
 
 #[rocket::main]
 async fn main() {
-    rocket::build()
-        // .register(catchers![not_found])
+    let _ = rocket::build()
+        .register("/", catchers![not_found])
         .mount(
             "/api",
             routes![
@@ -204,7 +199,6 @@ async fn main() {
                 delete_question_ep,
             ],
         )
-        // .attach(DbConn::fairing())
         .launch()
         .await;
 }

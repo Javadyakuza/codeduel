@@ -369,3 +369,4 @@ pub struct RQuestions {
     pub rival_id: String,
     pub question_title: String, // fetched from fe
 }
+

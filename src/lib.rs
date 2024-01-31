@@ -2,14 +2,12 @@
 pub mod api_models;
 pub mod db_models;
 pub mod schema;
-
+pub mod tc_execution_lib;
 use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::NaiveDateTime;
-use code_executer::parse_init_execute;
-use code_executer::CargoProjectParams;
 use db_models::{
     Categories, QQuestions, QResponses, RQuestions, RUsers, UQuestion, UUser, UWallets,
 };
@@ -22,6 +20,8 @@ use schema::{
     questions::dsl::*, responses::dsl::*, test_cases::dsl::*, users::dsl::*, wallets::dsl::*,
 };
 pub use std::env;
+use tc_execution_lib::CargoProjectParams;
+use tc_execution_lib::{parse_init_execute, update_toml};
 
 pub fn establish_connection() -> PgConnection {
     // loading the env vars into the current scope

@@ -27,3 +27,10 @@ pub struct EpInQuestions {
     pub test_inputs: String,
     pub test_outputs: String,
 }
+
+// ------- test cases execution parameters -------- //
+#[derive(FromForm, Debug, Serialize, Clone)]
+pub struct CargoProjectParams {
+    pub executable: String,
+    pub executer: String,
+}
