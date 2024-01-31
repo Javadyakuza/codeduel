@@ -27,8 +27,8 @@ diesel = { version = \"2.1.1\", features = [\"postgres\", \"chrono\"] }
 dotenvy = \"0.15.7\"
 rocket = {version = \"0.5.0\", features = [\"json\"]}
 serde = { version = \"1.0.195\", features = [\"derive\"] }
-struct_iterable = \"0.1.1\"                                                                                                                          
-tokio = { version = \"1.18.2\", features = [\"full\"] }                                           
+struct_iterable = \"0.1.1\"                                                                                              
+tokio = { version = \"1.18.2\", features = [\"full\"] }       
 
 
 
@@ -299,6 +299,7 @@ pub async fn update_toml() -> Result<bool, Box<dyn std::error::Error>> {
     match options
         .read(true)
         .write(true)
+        .truncate(true)
         .open(format!("{}/Cargo.toml", pwd.to_str().unwrap()))
         .await
     {
