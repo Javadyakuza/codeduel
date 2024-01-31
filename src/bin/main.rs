@@ -2,6 +2,9 @@
 
 extern crate rocket; // imports all of the macros from the rocket crate
 
+use code_executer::parse_init_execute;
+use code_executer::update_toml;
+use code_executer::CargoProjectParams;
 use codeduel_backend::api_models::EpInQuestions;
 use codeduel_backend::api_models::EpQuQuestions;
 use codeduel_backend::db_models::*;
@@ -73,6 +76,29 @@ async fn add_question_ep(
     let insertable_query_struct: IQuestions;
     match IQuestions::from_ep_in_question(insertable_question.clone()) {
         Ok(q) => insertable_query_struct = q,
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+
+    // testing the the passed samples of the question
+    let temp_runner_params: CargoProjectParams = CargoProjectParams {
+        executable: tcs.executable_solution.to_owned(),
+        executer: tcs.solution_executer.to_owned(),
+    };
+
+    match parse_init_execute(temp_runner_params).await {
+        Ok(res) => {
+            println!("this is the res {}", res);
+            if !res {
+                return Json(Err("Running test cases failed".to_string()));
+            }
+        }
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+
+    let _ = rocket::tokio::time::sleep(rocket::tokio::time::Duration::from_secs(10)).await;
+
+    match update_toml().await {
+        Ok(_) => {}
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
     match add_new_question(&mut conn, &insertable_query_struct, &mut tcs).await {

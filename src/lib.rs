@@ -100,28 +100,6 @@ pub async fn add_new_question(
         }
     }
 
-    // testing the the passed samples of the question
-    let temp_runner_params: CargoProjectParams = CargoProjectParams {
-        executable: _test_cases.executable_solution.to_owned(),
-        executer: _test_cases.solution_executer.to_owned(),
-    };
-
-    match parse_init_execute(temp_runner_params).await {
-        Ok(res) => {
-            if !res {
-                return Err(Box::new(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "running reference sample failed.",
-                )));
-            }
-        }
-        Err(e) => {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("{:?}", e),
-            )))
-        }
-    }
     // inserting the new user
     match diesel::insert_into(questions::table)
         .values(_new_question)

@@ -57,19 +57,22 @@ pub async fn parse_init_execute(
 
     // creating the file system options
     let mut options = tokio::fs::File::options();
+    let creator_path = format!("{}/code_executer/temp_creator.sh", pwd.to_str().unwrap());
+    let runner_path = format!("{}/code_executer/temp_runner.sh", pwd.to_str().unwrap());
+    let remover_path = format!("{}/code_executer/temp_remover.sh", pwd.to_str().unwrap());
 
     // writing the temp creator bash file commands
-    match options.write(true).read(true).open("temp_creator.sh").await {
+    match options.write(true).read(true).open(&creator_path).await {
         Ok(mut file) => {
             match file
                 .write_all(
                     format!(
                         "
-                        cargo new $PWD/temp_exe/codu_tmp_exe{} --bin &&
-                        chown -R javadyakuza:javadyakuza $PWD/temp_exe/codu_tmp_exe{} &&
-                        touch $PWD/temp_exe/codu_tmp_exe{}/src/executable.rs &&
-                        echo \"cargo build --manifest-path $PWD/temp_exe/codu_tmp_exe{}/Cargo.toml\" > $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh &&
-                        chmod +x $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh
+                        cargo new $PWD/code_executer/temp_exe/codu_tmp_exe{} --bin &&
+                        chown -R javadyakuza:javadyakuza $PWD/code_executer/temp_exe/codu_tmp_exe{} &&
+                        touch $PWD/code_executer/temp_exe/codu_tmp_exe{}/src/executable.rs &&
+                        echo \"cargo build --manifest-path $PWD/code_executer/temp_exe/codu_tmp_exe{}/Cargo.toml\" > $PWD/temp_exe/codu_tmp_exe{}/bin_builder.sh &&
+                        chmod +x $PWD/code_executer/temp_exe/codu_tmp_exe{}/bin_builder.sh
                         ",
                         rpn, rpn, rpn, rpn, rpn, rpn,
                     )
@@ -95,11 +98,7 @@ pub async fn parse_init_execute(
     }
 
     // executing the bash script to generate the project
-    let _ = match Command::new("sh")
-        .arg(format!("{}/temp_creator.sh", pwd.to_str().unwrap()))
-        .output()
-        .await
-    {
+    let _ = match Command::new("sh").arg(&creator_path).output().await {
         Ok(o) => {
             println!("creator {:?}", o.stdout);
         }
@@ -112,15 +111,15 @@ pub async fn parse_init_execute(
     };
 
     // writing the purger commands on the project
-    let _ = match options.write(true).read(true).open("temp_remover.sh").await {
+    let _ = match options.write(true).read(true).open(&remover_path).await {
         Ok(mut file) => {
             match file
                 .write_all(
                     format!(
                         "
-                        rm -rf temp_exe/codu_tmp_exe{} &&
-                        rm -rf target/debug/codu_tmp_exe{} &&
-                        rm -rf target/debug/codu_tmp_exe{}.d
+                        rm -rf code_executer/temp_exe/codu_tmp_exe{} &&
+                        rm -rf code_executer/target/debug/codu_tmp_exe{} &&
+                        rm -rf code_executer/target/debug/codu_tmp_exe{}.d
                         ",
                         rpn, rpn, rpn,
                     )
@@ -149,7 +148,7 @@ pub async fn parse_init_execute(
         .write(true)
         .read(true)
         .open(format!(
-            "{}/temp_exe/codu_tmp_exe{}/src/executable.rs",
+            "{}/code_executer/temp_exe/codu_tmp_exe{}/src/executable.rs",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -176,7 +175,7 @@ pub async fn parse_init_execute(
         .write(true)
         .read(true)
         .open(format!(
-            "{}/temp_exe/codu_tmp_exe{}/src/main.rs",
+            "{}/code_executer/temp_exe/codu_tmp_exe{}/src/main.rs",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -205,7 +204,7 @@ pub async fn parse_init_execute(
         //     rpn
         // ))
         .arg(format!(
-            "{}/temp_exe/codu_tmp_exe{}/bin_builder.sh",
+            "{}/code_executer/temp_exe/codu_tmp_exe{}/bin_builder.sh",
             pwd.to_str().unwrap(),
             rpn
         ))
@@ -239,12 +238,16 @@ pub async fn parse_init_execute(
     };
 
     // writing the compiled program bin executer
-    let _ = match options.write(true).read(true).open("temp_runner.sh").await {
+    let _ = match options.write(true).read(true).open(&runner_path).await {
         Ok(mut file) => {
             match file
                 .write_all(
-                    format!("{}/target/debug/codu_tmp_exe{}", pwd.to_str().unwrap(), rpn)
-                        .as_bytes(),
+                    format!(
+                        "{}/code_executer/target/debug/codu_tmp_exe{}",
+                        pwd.to_str().unwrap(),
+                        rpn
+                    )
+                    .as_bytes(),
                 )
                 .await
             {
@@ -265,11 +268,7 @@ pub async fn parse_init_execute(
         }
     };
 
-    let _ = match Command::new("sh")
-        .arg(format!("{}/temp_runner.sh", pwd.to_str().unwrap()))
-        .output()
-        .await
-    {
+    let _ = match Command::new("sh").arg(&runner_path).output().await {
         Ok(o) => {
             let tmp_output = String::from_utf8_lossy(&o.stdout).to_string();
             if tmp_output.contains("false") {
@@ -296,12 +295,16 @@ pub async fn update_toml() -> Result<bool, Box<dyn std::error::Error>> {
     // creating the file system options and getting the current path
     let mut options = tokio::fs::File::options();
     let pwd = env::current_dir().unwrap(); // panic impossible
+    let remover_path = format!("{}/code_executer/temp_remover.sh", pwd.to_str().unwrap());
 
     // replacing the cargo.toml file with the static content
     match options
         .read(true)
         .write(true)
-        .open(format!("{}/Cargo.toml", pwd.to_str().unwrap()))
+        .open(format!(
+            "{}/code_executer/Cargo.toml",
+            pwd.to_str().unwrap()
+        ))
         .await
     {
         Ok(mut f) => {
@@ -310,11 +313,7 @@ pub async fn update_toml() -> Result<bool, Box<dyn std::error::Error>> {
             match f.write_all(STATIC_TOML.as_bytes()).await {
                 Ok(_) => {
                     // running the bash script and purging the project
-                    let _ = match Command::new("sh")
-                        .arg(format!("{}/temp_remover.sh", pwd.to_str().unwrap()))
-                        .output()
-                        .await
-                    {
+                    let _ = match Command::new("sh").arg(&remover_path).output().await {
                         Ok(_) => {}
                         Err(e) => {
                             return Err(Box::new(std::io::Error::new(
