@@ -2,11 +2,14 @@
 pub mod api_models;
 pub mod db_models;
 pub mod schema;
+
 use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };
 use crate::schema::{questions, responses, test_cases, users, wallets};
 use chrono::NaiveDateTime;
+use code_executer::parse_init_execute;
+use code_executer::CargoProjectParams;
 use db_models::{
     Categories, QQuestions, QResponses, RQuestions, RUsers, UQuestion, UUser, UWallets,
 };
@@ -73,7 +76,7 @@ pub fn add_user_wallet(
 }
 
 // unchecked - un-optimized
-pub fn add_new_question(
+pub async fn add_new_question(
     conn: &mut PgConnection,
     _new_question: &IQuestions,
     _test_cases: &mut ITestCases,
@@ -97,6 +100,28 @@ pub fn add_new_question(
         }
     }
 
+    // testing the the passed samples of the question
+    let temp_runner_params: CargoProjectParams = CargoProjectParams {
+        executable: _test_cases.executable_solution.to_owned(),
+        executer: _test_cases.solution_executer.to_owned(),
+    };
+
+    match parse_init_execute(temp_runner_params).await {
+        Ok(res) => {
+            if !res {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "running reference sample failed.",
+                )));
+            }
+        }
+        Err(e) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", e),
+            )))
+        }
+    }
     // inserting the new user
     match diesel::insert_into(questions::table)
         .values(_new_question)

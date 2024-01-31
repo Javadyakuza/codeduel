@@ -1,4 +1,4 @@
-use rocket::*;
+use rocket::FromForm;
 
 use serde::Serialize;
 

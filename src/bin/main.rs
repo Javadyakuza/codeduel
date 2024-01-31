@@ -6,10 +6,12 @@ use codeduel_backend::api_models::EpInQuestions;
 use codeduel_backend::api_models::EpQuQuestions;
 use codeduel_backend::db_models::*;
 use codeduel_backend::*;
-use rocket::request::Form;
+use rocket::form::Form;
+use rocket::http::Status;
 use rocket::request::Request;
+use rocket::response::status;
+use rocket::serde::json::{json, Json, Value};
 use rocket::*;
-use rocket_contrib::json::Json;
 // use solana_sdk::signature::Signature;
 
 // ------------- get endpoints ---------- //
@@ -57,7 +59,9 @@ fn add_user_ep(insertable_user: Form<IUsers>) -> Json<Result<Users, String>> {
 }
 
 #[post("/add_question", data = "<insertable_question>")]
-fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Questions, String>> {
+async fn add_question_ep(
+    insertable_question: Form<EpInQuestions>,
+) -> Json<Result<Questions, String>> {
     let mut conn = establish_connection();
     let mut tcs: ITestCases = ITestCases {
         question_id: 0,
@@ -71,7 +75,7 @@ fn add_question_ep(insertable_question: Form<EpInQuestions>) -> Json<Result<Ques
         Ok(q) => insertable_query_struct = q,
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
-    match add_new_question(&mut conn, &insertable_query_struct, &mut tcs) {
+    match add_new_question(&mut conn, &insertable_query_struct, &mut tcs).await {
         Ok(res) => return Json(Ok(res.0)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
@@ -154,9 +158,10 @@ fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
 }
 
-fn main() {
-    rocket::ignite()
-        .register(catchers![not_found])
+#[rocket::main]
+async fn main() {
+    rocket::build()
+        // .register(catchers![not_found])
         .mount(
             "/api",
             routes![
@@ -174,5 +179,6 @@ fn main() {
             ],
         )
         // .attach(DbConn::fairing())
-        .launch();
+        .launch()
+        .await;
 }

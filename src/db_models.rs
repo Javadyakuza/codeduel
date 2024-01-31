@@ -4,7 +4,11 @@ use diesel::prelude::*;
 // use merge_derivable;
 use crate::api_models::{EpInQuestions, EpQuQuestions};
 use chrono::NaiveDateTime;
-use rocket::FromForm;
+use rocket::{
+    http::Header,
+    response::{self, Responder},
+    FromForm, Request, Response,
+};
 // use rocket::{http::RawStr, request::FromFormValue};
 use serde::{Deserialize, Serialize};
 use struct_iterable::Iterable;
@@ -79,7 +83,17 @@ pub struct Users {
     pub total_claimed: i32,
     pub total_unclaimed: i32,
 }
+// impl<'r, 'o: 'r> Responder<'r, 'o> for Users {
+//     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'o> {
+//         // log `self` to your favored error tracker, e.g.
+//         // sentry::capture_error(&self);
 
+//         match self {
+//             // in our simplistic example, we're happy to respond with the default 500 responder in all cases
+//             _ => Ok(Response::build_from(self).finalize()),
+//         }
+//     }
+// }
 // ------------------------------- insertable models ----------------------------
 // the following models are not containing the primary key fields, making able the fns to insert the values without the pks.
 

@@ -1,4 +1,4 @@
-workspace = { members = ["src/code_executer"] }
+workspace = { members = ["code_executer"] }
 [package]
 name = "codeduel_backend"
 version = "0.1.0"
@@ -18,11 +18,8 @@ cargo-watch = "8.4.1"
 chrono = { version = "0.4.31", features = ["serde", "rustc-serialize"] }
 diesel = { version = "2.1.1", features = ["postgres", "chrono"] }
 dotenvy = "0.15.7"
-rocket = "0.4.5"
+rocket = {version = "0.5.0", features = ["json"]}
 serde = { version = "1.0.195", features = ["derive"] }
 struct_iterable = "0.1.1"
+code_executer = {path = "./code_executer"}
 
-
-[dependencies.rocket_contrib]
-version = "0.4.5"
-features = ["handlebars_templates", "tera_templates"]
