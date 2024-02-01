@@ -1,13 +1,20 @@
+[default]
+address = "172.30.34.171"
+port = 8000
+keep_alive = 5
+log = "debug"
+limit = { forms = 32768 }
+
 [development]
-address = ""
-port =
-keep_alive = 
-log = debug"
+address = "172.30.34.171"
+port = 8000
+keep_alive = 5
+log = "debug"
 limit = { forms = 32768 }
 
 [production]
-address = ""
-port =
-keep_alive = 
-log = debug"
+address = "172.30.34.171"
+port = 8000
+keep_alive = 5
+log = "debug"
 limit = { forms = 32768 }
