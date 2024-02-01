@@ -9,8 +9,8 @@ use codeduel_backend::*;
 use rocket::form::Form;
 use rocket::request::Request;
 use rocket::serde::json::Json;
+use rocket::shield::Shield;
 use rocket::*;
-// use solana_sdk::signature::Signature;
 
 // ------------- get endpoints ---------- //
 #[get("/get_user/<username_or_id>")]
@@ -187,6 +187,7 @@ fn not_found(req: &Request) -> String {
 #[rocket::main]
 async fn main() {
     let _ = rocket::build()
+        .attach(Shield::new())
         .register("/", catchers![not_found])
         .mount(
             "/api",
