@@ -284,7 +284,7 @@ impl QQuestions {
         } else {
             qq.question_id = Some(ep_question.question_id);
         }
-        if &ep_question.question_title == "" {
+        if &ep_question.question_title == " " || &ep_question.question_title == "" {
             qq.question_title = None;
         } else {
             qq.question_title = Some(ep_question.question_title.clone());

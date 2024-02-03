@@ -262,9 +262,7 @@ impl Fairing for Cors {
 #[rocket::main]
 async fn main() -> Result<(), Error> {
     // Allowed origins can be specified as exact strings or as regex patterns
-    let allowed_origins = AllowedOrigins::some_exact(&[
-        "http://localhost:8000", // Specify your frontend origin here
-    ]);
+    let allowed_origins = AllowedOrigins::some_exact(&["http://localhost:5173"]);
 
     // Configure CORS
     let cors = rocket_cors::CorsOptions {
