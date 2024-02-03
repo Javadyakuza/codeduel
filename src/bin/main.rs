@@ -1,6 +1,7 @@
-#![feature(decl_macro)] // helps us with the routing of our application
+// #![feature(decl_macro)] // helps us with the routing of our application
 
 extern crate rocket; // imports all of the macros from the rocket crate
+extern crate rocket_cors;
 
 use codeduel_backend::api_models::{CargoProjectParams, EpInQuestions, EpQuQuestions};
 use codeduel_backend::db_models::*;
@@ -10,7 +11,9 @@ use rocket::form::Form;
 use rocket::request::Request;
 use rocket::serde::json::Json;
 use rocket::shield::Shield;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 use rocket::*;
+use rocket::http::Method;
 
 // ------------- get endpoints ---------- //
 #[get("/get_user/<username_or_id>")]
@@ -185,9 +188,32 @@ fn not_found(req: &Request) -> String {
 }
 
 #[rocket::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
+    // Allowed origins can be specified as exact strings or as regex patterns
+       let allowed_origins = AllowedOrigins::some_exact(&[
+        "http://localhost:3000", // Specify your frontend origin here
+    ]);
+
+    // Configure CORS
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get, Method::Post, Method::Put, Method::Delete]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::some(&[
+            "Authorization",
+            "Accept",
+            "Content-Type",
+        ]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()?;
+
     let _ = rocket::build()
         .attach(Shield::new())
+        .attach(cors)
         .register("/", catchers![not_found])
         .mount(
             "/api",
@@ -207,4 +233,6 @@ async fn main() {
         )
         .launch()
         .await;
+
+    Ok(())
 }
