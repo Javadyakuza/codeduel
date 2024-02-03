@@ -1107,6 +1107,7 @@ dependencies = [
  "dotenvy",
  "rocket",
  "rocket_cors",
+ "rocket_http",
  "serde",
  "solana-client",
  "solana-sdk",
@@ -4013,8 +4014,7 @@ dependencies = [
 [[package]]
 name = "rocket_cors"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfac3a1df83f8d4fc96aa41dba3b86c786417b7fc0f52ec76295df2ba781aa69"
+source = "git+https://github.com/lawliet89/rocket_cors?branch=master#072d90359b23e9b291df6b672c07c93de9c46011"
 dependencies = [
  "http",
  "log",

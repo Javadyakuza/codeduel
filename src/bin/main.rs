@@ -1,19 +1,19 @@
-// #![feature(decl_macro)] // helps us with the routing of our application
+#![feature(decl_macro)] // helps us with the routing of our application
 
-extern crate rocket; // imports all of the macros from the rocket crate
+extern crate rocket;
 extern crate rocket_cors;
-
 use codeduel_backend::api_models::{CargoProjectParams, EpInQuestions, EpQuQuestions};
 use codeduel_backend::db_models::*;
 use codeduel_backend::tc_execution_lib::{parse_init_execute, update_toml};
 use codeduel_backend::*;
+use rocket::fairing::{Fairing, Info, Kind};
 use rocket::form::Form;
+use rocket::http::Header;
 use rocket::request::Request;
 use rocket::serde::json::Json;
 use rocket::shield::Shield;
-use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 use rocket::*;
-use rocket::http::Method;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 // ------------- get endpoints ---------- //
 #[get("/get_user/<username_or_id>")]
@@ -186,26 +186,47 @@ fn delete_question_ep(removable_question: Form<RQuestions>) -> Json<Result<bool,
 fn not_found(req: &Request) -> String {
     format!("Oh no, we don't know where is {} ", req.uri())
 }
+pub struct Cors;
+#[rocket::async_trait]
+impl Fairing for Cors {
+    fn info(&self) -> Info {
+        Info {
+            name: "Cross-Origin-Resource-Sharing Fairing",
+            kind: Kind::Response,
+        }
+    }
+
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new(
+            "Access-Control-Allow-Methods",
+            "POST, PATCH, PUT, DELETE, HEAD, OPTIONS, GET",
+        ));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
+}
 
 #[rocket::main]
 async fn main() -> Result<(), Error> {
     // Allowed origins can be specified as exact strings or as regex patterns
-       let allowed_origins = AllowedOrigins::some_exact(&[
-        "http://localhost:3000", // Specify your frontend origin here
+    let allowed_origins = AllowedOrigins::some_exact(&[
+        "http://localhost:8000", // Specify your frontend origin here
     ]);
 
     // Configure CORS
     let cors = rocket_cors::CorsOptions {
         allowed_origins,
-        allowed_methods: vec![Method::Get, Method::Post, Method::Put, Method::Delete]
-            .into_iter()
-            .map(From::from)
-            .collect(),
-        allowed_headers: AllowedHeaders::some(&[
-            "Authorization",
-            "Accept",
-            "Content-Type",
-        ]),
+        allowed_methods: vec![
+            rocket_http::Method::Get,
+            rocket_http::Method::Post,
+            rocket_http::Method::Put,
+            rocket_http::Method::Delete,
+        ]
+        .into_iter()
+        .map(From::from)
+        .collect(),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept", "Content-Type"]),
         allow_credentials: true,
         ..Default::default()
     }
