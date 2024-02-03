@@ -21,6 +21,7 @@ use schema::{
     questions::dsl::*, responses::dsl::*, test_cases::dsl::*, users::dsl::*, wallets::dsl::*,
 };
 pub use std::env;
+use wallet_lib::handle_solved_question;
 
 pub fn establish_connection() -> PgConnection {
     // loading the env vars into the current scope
@@ -135,7 +136,7 @@ pub async fn add_new_question(
 pub fn add_response(
     conn: &mut PgConnection,
     _new_response: &IResponses,
-) -> Result<bool, Box<dyn std::error::Error>> {
+) -> Result<Vec<String>, Box<dyn std::error::Error>> {
     // this function will only be called when a solution was provided and tested and it was true.
     // checking the question and setting the correct status for the question
     let q = get_question(
@@ -161,7 +162,7 @@ pub fn add_response(
         .returning(Responses::as_returning())
         .get_result(conn)
     {
-        Ok(nr) => {
+        Ok(_) => {
             // updating the question
             match diesel::update(
                 questions.filter(questions::question_id.eq(_new_response.question_id)),
@@ -170,7 +171,18 @@ pub fn add_response(
             .returning(Questions::as_returning())
             .get_result(conn)
             {
-                Ok(nu) => Ok(true),
+                Ok(_) => {
+                    // transferring the tokens
+                    match handle_solved_question(conn, q[0].clone()) {
+                        Ok(sigs) => Ok(sigs),
+                        Err(e) => {
+                            return Err(Box::new(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                format!("{:?}", e),
+                            )))
+                        }
+                    }
+                }
                 Err(e) => {
                     return Err(Box::new(std::io::Error::new(
                         std::io::ErrorKind::Other,

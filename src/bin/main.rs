@@ -111,7 +111,7 @@ async fn add_question_ep(
 }
 
 #[post("/try_solution", data = "<triable_solution>")]
-async fn try_solution_ep(triable_solution: Form<IResponses>) -> Json<Result<bool, String>> {
+async fn try_solution_ep(triable_solution: Form<IResponses>) -> Json<Result<Vec<String>, String>> {
     let mut conn = establish_connection();
 
     let executer: String = match get_test_cases(&mut conn, triable_solution.question_id) {
