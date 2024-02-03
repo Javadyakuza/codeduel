@@ -101,8 +101,8 @@ pub struct IResponses {
     pub daredevil_id: i32,
     pub question_id: i32,
     pub response_code: String,
-    pub correctness: bool,
-    // pub creation_time: NaiveDateTime, calculated by the db
+    pub correctness: bool, // should always be true
+                           // pub creation_time: NaiveDateTime, calculated by the db
 }
 
 #[derive(Queryable, Selectable, Debug, Insertable, Clone, Serialize, Iterable)]

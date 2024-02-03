@@ -110,15 +110,56 @@ async fn add_question_ep(
     }
 }
 
-#[post("/add_response", data = "<insertable_response>")]
-fn add_response_ep(insertable_response: Form<IResponses>) -> Json<Result<Responses, String>> {
+#[post("/try_solution", data = "<triable_solution>")]
+async fn try_solution_ep(triable_solution: Form<IResponses>) -> Json<Result<bool, String>> {
     let mut conn = establish_connection();
 
-    match add_response(&mut conn, &insertable_response) {
-        Ok(res) => return Json(Ok(res)),
+    let executer: String = match get_test_cases(&mut conn, triable_solution.question_id) {
+        Ok(tcs) => tcs.solution_executer,
+        Err(e) => format!("{:?}", e),
+    };
+    // testing the response
+    let temp_runner_params: CargoProjectParams = CargoProjectParams {
+        executable: triable_solution.response_code.to_owned(),
+        executer: executer.to_owned(),
+    };
+
+    let test_cases_res: String = match parse_init_execute(temp_runner_params).await {
+        Ok(res) => {
+            if !res {
+                return Json(Err("Running test cases failed".to_string()));
+            }
+            "true".to_string()
+        }
+        Err(e) => format!("{:?}", e),
+    };
+
+    let _ = rocket::tokio::time::sleep(rocket::tokio::time::Duration::from_secs(10)).await;
+
+    match update_toml().await {
+        Ok(_) => {}
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+
+    if test_cases_res != "true".to_string() {
+        return Json(Err(test_cases_res));
+    }
+
+    match add_response(&mut conn, &triable_solution) {
+        Ok(_) => return Json(Ok(true)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
+
+// #[post("/add_response", data = "<insertable_response>")]
+// fn add_response_ep(insertable_response: Form<IResponses>) -> Json<Result<Responses, String>> {
+//     let mut conn = establish_connection();
+
+//     match add_response(&mut conn, &insertable_response) {
+//         Ok(res) => return Json(Ok(res)),
+//         Err(e) => return Json(Err(format!("{:?}", e))),
+//     }
+// }
 
 #[post("/add_user_wallet", data = "<insertable_user_wallet>")]
 fn add_user_wallet_ep(insertable_user_wallet: Form<Wallets>) -> Json<Result<String, String>> {
@@ -243,7 +284,7 @@ async fn main() -> Result<(), Error> {
                 get_question_ep,
                 add_user_ep,
                 add_question_ep,
-                add_response_ep,
+                try_solution_ep,
                 add_user_wallet_ep,
                 update_user_ep,
                 update_user_wallet_ep,

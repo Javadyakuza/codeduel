@@ -28,6 +28,13 @@ pub struct EpInQuestions {
     pub test_outputs: String,
 }
 
+// #[derive(FromForm, Debug, Serialize, Clone)]
+// pub struct EpTrySolution {
+//     pub question_id: i32,
+//     pub daredevil: i32,
+//     pub executable_solution: String,
+//     pub correctness: bool,
+// }
 // ------- test cases execution parameters -------- //
 #[derive(FromForm, Debug, Serialize, Clone)]
 pub struct CargoProjectParams {
