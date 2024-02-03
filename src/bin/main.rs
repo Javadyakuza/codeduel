@@ -146,7 +146,7 @@ async fn try_solution_ep(triable_solution: Form<IResponses>) -> Json<Result<bool
     }
 
     match add_response(&mut conn, &triable_solution) {
-        Ok(_) => return Json(Ok(true)),
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }

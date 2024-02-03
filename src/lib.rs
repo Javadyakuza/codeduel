@@ -135,14 +135,50 @@ pub async fn add_new_question(
 pub fn add_response(
     conn: &mut PgConnection,
     _new_response: &IResponses,
-) -> Result<Responses, Box<dyn std::error::Error>> {
-    // inserting the new user
+) -> Result<bool, Box<dyn std::error::Error>> {
+    // this function will only be called when a solution was provided and tested and it was true.
+    // checking the question and setting the correct status for the question
+    let q = get_question(
+        conn,
+        &QQuestions {
+            question_id: Some(_new_response.question_id),
+            question_title: None,
+            rival_id: None,
+            question_category: None,
+        },
+    )
+    .unwrap(); // panic impossible
+
+    if q[0].question_status > 2 {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::PermissionDenied,
+            format!("the answered question is not open"),
+        )));
+    } // inserting the new user
+
     match diesel::insert_into(responses::table)
         .values(_new_response)
         .returning(Responses::as_returning())
         .get_result(conn)
     {
-        Ok(nr) => Ok(nr),
+        Ok(nr) => {
+            // updating the question
+            match diesel::update(
+                questions.filter(questions::question_id.eq(_new_response.question_id)),
+            )
+            .set((question_status.eq(4),))
+            .returning(Questions::as_returning())
+            .get_result(conn)
+            {
+                Ok(nu) => Ok(true),
+                Err(e) => {
+                    return Err(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        format!("{:?}", e),
+                    )))
+                }
+            }
+        }
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
