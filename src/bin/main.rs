@@ -5,6 +5,7 @@ extern crate rocket_cors;
 use codeduel_backend::api_models::{CargoProjectParams, EpInQuestions, EpQuQuestions};
 use codeduel_backend::db_models::*;
 use codeduel_backend::tc_execution_lib::{parse_init_execute, update_toml};
+use codeduel_backend::wallet_lib::handle_dead_question;
 use codeduel_backend::*;
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::form::Form;
@@ -106,6 +107,16 @@ async fn add_question_ep(
 
     match add_new_question(&mut conn, &insertable_query_struct, &mut tcs).await {
         Ok(res) => return Json(Ok(res.0)),
+        Err(e) => return Json(Err(format!("{:?}", e))),
+    }
+}
+
+#[post("/close_question", data = "<question_id>")]
+async fn handle_dead_question_ep(question_id: Form<i32>) -> Json<Result<String, String>> {
+    let mut conn = establish_connection();
+
+    match handle_dead_question(&mut conn, *question_id) {
+        Ok(res) => return Json(Ok(res)),
         Err(e) => return Json(Err(format!("{:?}", e))),
     }
 }
@@ -284,6 +295,7 @@ async fn main() -> Result<(), Error> {
                 get_question_ep,
                 add_user_ep,
                 add_question_ep,
+                handle_dead_question_ep,
                 try_solution_ep,
                 add_user_wallet_ep,
                 update_user_ep,
