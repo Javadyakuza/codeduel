@@ -1,5 +1,5 @@
-use crate::db_models::Questions;
-use crate::get_user_wallet;
+use crate::db_models::{QQuestions, Questions};
+use crate::{get_question, get_user_wallet};
 pub use diesel;
 pub use diesel::pg::PgConnection;
 pub use diesel::prelude::*;
@@ -103,10 +103,21 @@ pub fn handle_solved_question(
 
 pub fn handle_dead_question(
     _conn: &mut PgConnection,
-    _question: Questions,
+    _question_id: i32,
 ) -> Result<String, Box<dyn std::error::Error>> {
+    let q = get_question(
+        _conn,
+        &QQuestions {
+            question_id: Some(_question_id),
+            question_title: None,
+            rival_id: None,
+            question_category: None,
+        },
+    )
+    .unwrap(); // panic impossible
+
     // getting the rival account address to transfer the prize pool left sol tokens to,
-    let rival_pubkey: Pubkey = match get_user_wallet(_conn, _question.rival_id) {
+    let rival_pubkey: Pubkey = match get_user_wallet(_conn, q[0].rival_id) {
         Ok(w) => Pubkey::from_str(w.as_str()).unwrap(),
         Err(e) => {
             return Err(Box::new(std::io::Error::new(
@@ -138,7 +149,7 @@ pub fn handle_dead_question(
     };
 
     // preparing the rival reward - 1% of the platform share
-    let mut rival_share: u64 = (_question.prize_pool * 10_i32.pow(9)) as u64;
+    let mut rival_share: u64 = (q[0].prize_pool * 10_i32.pow(9)) as u64;
 
     rival_share = rival_share - rival_share / 100_u64;
 
