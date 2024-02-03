@@ -3,6 +3,7 @@ pub mod api_models;
 pub mod db_models;
 pub mod schema;
 pub mod tc_execution_lib;
+pub mod wallet_lib;
 use crate::db_models::{
     IQuestions, IResponses, ITestCases, IUsers, Questions, Responses, TestCases, Users, Wallets,
 };

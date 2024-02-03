@@ -43,3 +43,4 @@ CREATE TABLE wallets (
     sol_addr VARCHAR(64) NOT NULL,
     PRIMARY KEY (user_id, sol_addr)
 );
+

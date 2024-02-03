@@ -1,5 +1,5 @@
 [default]
-address = "172.30.34.171"
+address = "127.0.0.1"
 port = 8000
 keep_alive = 5
 log = "debug"
