@@ -137,7 +137,10 @@ pub fn handle_dead_question(
         }
     };
 
-    let rival_share: u64 = (_question.prize_pool * 10_i32.pow(9)) as u64;
+    // preparing the rival reward - 1% of the platform share
+    let mut rival_share: u64 = (_question.prize_pool * 10_i32.pow(9)) as u64;
+
+    rival_share = rival_share - rival_share / 100_u64;
 
     // sending the tokens to the daredevil
     match rpc.send_and_confirm_transaction(&Transaction::new_signed_with_payer(
