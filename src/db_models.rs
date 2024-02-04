@@ -294,7 +294,7 @@ impl QQuestions {
         } else {
             qq.rival_id = Some(ep_question.rival_id);
         }
-        if ep_question.question_category == "" {
+        if ep_question.question_category == "" || ep_question.question_category == " " {
             qq.question_category = Some(Categories::All);
         } else {
             qq.question_category = Some(Categories::from_string(
