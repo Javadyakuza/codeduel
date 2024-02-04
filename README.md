@@ -3,6 +3,8 @@
 ![CODEDUEL LOGO](https://github.com/Javadyakuza/codeduel/blob/server/backend/public/codu_l.png)
 
 
+
+[DEPLOYED UI](https://code-duel-frontend.vercel.app/%5C)
 ## CodeDuel: Elevate Your Programming Challenges
 
 
