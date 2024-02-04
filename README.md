@@ -1,6 +1,6 @@
 # CODE DUEL
 
-![CODEDUEL LOGO](https://raw.githubusercontent.com/Javadyakuza/codeduel/backend/server/public/codu_l.png)
+![CODEDUEL LOGO](https://github.com/Javadyakuza/codeduel/blob/server/backend/public/codu_l.png)
 
 
 ## CodeDuel: Elevate Your Programming Challenges
