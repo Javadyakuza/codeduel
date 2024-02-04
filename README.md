@@ -1,6 +1,6 @@
 # CODE DUEL
 
-![CODEDUEL LOGO](./codu_l.png)
+![CODEDUEL LOGO](https://raw.githubusercontent.com/Javadyakuza/codeduel_backend/server/public/codu_l.png)
 
 
 ## CodeDuel: Elevate Your Programming Challenges
@@ -11,7 +11,7 @@ Code Duel is a skill based platform where developers and tech corporations can e
 
 ## Project Description:
 
-CodeDuel is a dynamic platform designed to revolutionize the programming challenge experience by fostering a big community of "rivals" (question designers) and "daredevils" (problem solvers). It empowers rivals to create engaging challenges, rewards daredevils for their ingenuity, and fosters a culture of learning and collaboration and earning money 😉.
+CodeDuel is a dynamic platform designed to revolutionize the programming challenge experience by fostering a big community of "rivals" (question designers) and "daredevils" (problem solvers). It empowers rivals to create engaging challenges, rewards daredevils for their ingenuity, and fosters a culture of learning and collaboration. (and earning money 😉)
 
 ## In Progress Features:
 
