@@ -1,6 +1,6 @@
 # CODE DUEL
 
-![CODEDUEL LOGO](https://imgpost.co/image/codeduel-logo.n26R)
+![CODEDUEL LOGO](./codu_l.png)
 
 
 ## CodeDuel: Elevate Your Programming Challenges
